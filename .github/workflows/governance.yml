@@ -44,6 +44,17 @@ jobs:
       - name: Install Agentic CLI
         run: npm install -g @agentic-suite/cli
 
+      - name: Setup Agentic user profile
+        run: |
+          mkdir -p ~/.agentic
+          cat > ~/.agentic/profile.json << 'EOF'
+          {
+            "user_id": "github-actions-ci",
+            "email": "ci@agentic-suite.local",
+            "name": "CI/CD Bot"
+          }
+          EOF
+
       - name: Run Guardian analysis
         env:
           AGENTIC_TOKEN: ${{ secrets.AGENTIC_TOKEN }}
