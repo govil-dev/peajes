@@ -47,4 +47,4 @@ jobs:
       - name: Run Guardian analysis
         env:
           AGENTIC_TOKEN: ${{ secrets.AGENTIC_TOKEN }}
-        run: agentic check --json --fail-under 60
+        run: agentic check --json --fail-under 60 --project-id 58d60ad3-d369-4fbe-bff5-506ca40f71ff
