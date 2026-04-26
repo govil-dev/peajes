@@ -1,0 +1,54 @@
+package co.quind.peajes.tollcollection.infrastructure.adapter.kafka;
+
+import co.quind.peajes.tollcollection.domain.port.out.EventPublisherPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+/**
+ * Publica eventos de dominio en Kafka con semántica at-least-once.
+ * El producer está configurado con idempotencia habilitada.
+ */
+@Component
+public class KafkaEventPublisher implements EventPublisherPort {
+
+    private static final Logger log = LoggerFactory.getLogger(KafkaEventPublisher.class);
+
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final String transactionsTopic;
+    private final String accountsTopic;
+
+    public KafkaEventPublisher(
+            KafkaTemplate<String, Object> kafkaTemplate,
+            @Value("${toll.kafka.topics.transactions}") String transactionsTopic,
+            @Value("${toll.kafka.topics.accounts}") String accountsTopic) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.transactionsTopic = transactionsTopic;
+        this.accountsTopic = accountsTopic;
+    }
+
+    @Override
+    public Mono<Void> publishToTransactions(Object event) {
+        return publish(transactionsTopic, event);
+    }
+
+    @Override
+    public Mono<Void> publishToAccounts(Object event) {
+        return publish(accountsTopic, event);
+    }
+
+    private Mono<Void> publish(String topic, Object event) {
+        return Mono.fromFuture(() -> kafkaTemplate.send(topic, event).toCompletableFuture())
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnSuccess(r -> log.info("Evento publicado en topic={} partition={} offset={}",
+                        r.getRecordMetadata().topic(),
+                        r.getRecordMetadata().partition(),
+                        r.getRecordMetadata().offset()))
+                .doOnError(e -> log.error("Error publicando evento en topic={}: {}", topic, e.getMessage()))
+                .then();
+    }
+}

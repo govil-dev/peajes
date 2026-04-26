@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: peajes-toll-collection
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/peajes
+    username: peajes
+    password: peajes
+
+  flyway:
+    url: jdbc:postgresql://localhost:5432/peajes
+    user: peajes
+    password: peajes
+    locations: classpath:db/migration
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      account-management:
+        failure-rate-threshold: 50
+        sliding-window-size: 10
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 5
+        register-health-indicator: true
+  timelimiter:
+    instances:
+      account-management:
+        timeout-duration: 200ms
+        cancel-running-future: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,circuitbreakers
+  health:
+    circuitbreakers:
+      enabled: true
+
+toll:
+  account-management:
+    base-url: http://account-management-api
+  balance-alert-threshold: "15000.00"
+  balance-alert-currency: "COP"
+  kafka:
+    topics:
+      transactions: toll.transactions.v1
+      accounts: toll.accounts.v1
