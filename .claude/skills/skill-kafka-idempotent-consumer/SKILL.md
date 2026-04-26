@@ -1,0 +1,37 @@
+---
+name: skill-kafka-idempotent-consumer
+description: "Design and implement Kafka consumers with robust deduplication logic using unique event identifiers (e.g., `passId`, `TollPassId`) to ensure 'at-least-once' delivery semantics result in 'exactly-once' processing for critical events."
+metadata:
+  framework_principle: P5
+  enforcement_mode: verify
+  criticality_level: [standard]
+---
+
+# Kafka Idempotent Consumer Development
+
+## Objetivo
+Design and implement Kafka consumers with robust deduplication logic using unique event identifiers (e.g., `passId`, `TollPassId`) to ensure 'at-least-once' delivery semantics result in 'exactly-once' processing for critical events.
+
+## Trigger
+during development
+
+## Inputs
+- Kafka event schemas
+- event processing requirements
+- unique identifier strategy
+
+## Procedimiento
+1. Identify critical events requiring idempotent processing.
+2. Ensure each critical event carries a unique identifier.
+3. Implement a mechanism (e.g., database check, Redis cache) to track processed event IDs.
+4. Design consumers to check for prior processing before executing business logic.
+5. Return the result of the first processing for subsequent identical requests.
+
+## Output esperado
+Kafka consumers that process events exactly once, even with duplicate messages.
+
+## Source refs (project)
+- 4f2ebe8b-ecaf-4b0a-841d-5649d6aa125f
+- ab3c0f85-9954-40c8-9b38-2425eee13781
+- 2ce684e1-dc0c-409e-a119-fb73906820c6
+- 6291d447-a826-4dc8-b458-54c61c276f1e

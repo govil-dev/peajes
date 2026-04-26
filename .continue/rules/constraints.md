@@ -1,0 +1,24 @@
+# Constraints del proyecto
+
+- Presupuesto de infraestructura: ≤ USD 2.500/mes en GCP + Confluent Cloud para ambientes dev + staging + prod durante MVP
+- Deadline MVP: Q3 2025 — release a producción con el primer concesionario piloto
+- Integraciones externas fijas: ANI (API REST propietaria, no existe OpenAPI spec, se integra vía adaptador con circuit breaker); Banco adquirente (SFTP + ISO 20022); PayU (SDK Java oficial)
+- Hardware de estación existente: Antenas RFID (protocolo EPC Gen2), cámaras LPR con API propietaria — no se reemplaza hardware
+- Regulación tarifaria: Las tarifas de peaje las fija la ANI — el sistema las carga como configuración, no las calcula
+- Equipo: 4 desarrolladores backend + 1 tech lead + 1 QA — no se contrata más personal para MVP
+- Idioma del código: Inglés para nombres de paquete, clases, métodos, eventos. Español en comentarios Javadoc orientados al negocio
+- Stack técnico mandatorio: No negociable para el MVP. Todo código generado por asistentes de IA debe respetar estas versiones.
+- PCI DSS Nivel 4: Aplica cuando se procesan números de tarjeta para recargas (integración PayU).
+- PCI DSS Nivel 4: PAN tokenizado; nunca se almacena el PAN completo; se guarda el token de PayU.
+- PCI DSS Nivel 4: Transmisión de datos de tarjeta siempre vía HTTPS/TLS 1.3.
+- PCI DSS Nivel 4: Acceso a datos de tarjeta restringido por roles (FinanceAnalyst con 2FA obligatorio).
+- PCI DSS Nivel 4: Escaneo de vulnerabilidades trimestral (ASV externo).
+- PCI DSS Nivel 4: Log de auditoría para accesos a datos de pago, retención 1 año mínimo.
+- Resolución DIAN 000042/2020 — Facturación electrónica: Factura electrónica en formato XML UBL 2.1 firmada con certificado digital DIAN.
+- Resolución DIAN 000042/2020 — Facturación electrónica: Envío al proveedor tecnológico autorizado (habilitado por DIAN) antes de entregar al adquirente.
+- Resolución DIAN 000042/2020 — Facturación electrónica: Nota crédito electrónica para anulaciones o correcciones.
+- Resolución DIAN 000042/2020 — Facturación electrónica: Numeración autorizada con CUFE (Código Único de Facturación Electrónica).
+- Resolución DIAN 000042/2020 — Facturación electrónica: Retención de XML firmados por 5 años mínimo (el sistema los retiene 7 años por política interna).
+- Seguridad de datos: Ningún campo PII en logs; PAN tokenizado en tránsito y en reposo.
+- Logging: MDC obligatorio por request para correlationId, tagId (enmascarado), stationId, traceId.
+- Logging: PII prohibida en logs; usar toMasked() para PII antes de loggear.
