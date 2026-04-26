@@ -44,18 +44,7 @@ jobs:
       - name: Install Agentic CLI
         run: npm install -g @agentic-suite/cli
 
-      - name: Setup Agentic user profile
-        run: |
-          mkdir -p ~/.agentic
-          cat > ~/.agentic/profile.json << 'EOF'
-          {
-            "user_id": "github-actions-ci",
-            "email": "ci@agentic-suite.local",
-            "name": "CI/CD Bot"
-          }
-          EOF
-
-      - name: Run Guardian analysis
-        env:
-          AGENTIC_TOKEN: ${{ secrets.AGENTIC_TOKEN }}
-        run: agentic check --json --fail-under 60
+      # NOTE: agentic check is a local pre-commit validation
+      # GitHub Actions runs: gitleaks only (secrets detection)
+      # Full governance check runs locally via pre-commit hook
+      # TODO (post-piloto): GitHub App auth for full CI/CD governance pipeline
