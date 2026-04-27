@@ -7,6 +7,9 @@ import co.quind.peajes.tollcollection.domain.model.TransactionStatus;
 /**
  * Resultado del procesamiento de un paso vehicular. Puede ser resultado en caché (idempotente)
  * o resultado nuevo.
+ *
+ * <p>Campo {@code fromCache} indica si la respuesta es replay de una transacción previa
+ * (idempotencia por passId). Útil para clientes que necesitan distinguir replay vs ejecución nueva.
  */
 public record TollPassResult(
         String passId,

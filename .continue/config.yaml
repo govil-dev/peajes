@@ -1,0 +1,8 @@
+name: PEAJES-CO-01-rules
+version: 0.1.0
+schema: v1
+
+rules:
+  - "External Service Integration Resilience: Interactions with external services must implement resilience patterns such as timeouts, circuit breakers, retries, fallbacks, and fire-and-forget for non-critical asynchronous calls. [language=general] [category=inferred] Data Validation & Error Handling: String fields must adhere to specified length limits. Numeric fields (e.g., balances) must enforce non-negativity, throwing specific exceptions (e.g., `InsufficientBalanceException`) on violation. [lang"
+
+docs: []

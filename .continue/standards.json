@@ -1,0 +1,37 @@
+[
+  {
+    "id": "static-001",
+    "title": "Naming Conventions",
+    "description": "Use camelCase for variables and functions, PascalCase for classes, UPPER_SNAKE_CASE for constants.",
+    "category": "coding_standard",
+    "language": "TypeScript"
+  },
+  {
+    "id": "static-002",
+    "title": "Error Handling",
+    "description": "Always handle errors explicitly. Never swallow exceptions silently. Use typed error classes for domain errors.",
+    "category": "coding_standard",
+    "language": "TypeScript"
+  },
+  {
+    "id": "static-003",
+    "title": "Repository Pattern",
+    "description": "Data access must go through repository interfaces. No direct DB queries in services or controllers.",
+    "category": "design_pattern",
+    "language": "Java"
+  },
+  {
+    "id": "static-004",
+    "title": "Dependency Injection",
+    "description": "Classes receive their dependencies via constructor. No static singletons. Use a DI container for wiring.",
+    "category": "design_pattern",
+    "language": "Java"
+  },
+  {
+    "id": "static-005",
+    "title": "Single Responsibility",
+    "description": "Each module, class, and function should have exactly one reason to change. Split when a unit handles multiple concerns.",
+    "category": "coding_standard",
+    "language": "General"
+  }
+]

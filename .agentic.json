@@ -1,0 +1,9 @@
+{
+  "project_code": "PEAJES-CO-01",
+  "project_name": "Peajes Colombia MVP",
+  "language": "Java",
+  "project_id": "58d60ad3-d369-4fbe-bff5-506ca40f71ff",
+  "repo_url": "https://github.com/govil-dev/peajes.git",
+  "default_branch": "main",
+  "framework": "Spring Boot 3.3.x + Spring WebFlux"
+}
