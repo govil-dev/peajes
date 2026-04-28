@@ -6,14 +6,14 @@ on:
   push:
     branches: [main, develop]
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   security-and-governance:
     name: Gitleaks + Guardian Analysis
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read   # gitleaks-action@v2 lee commits del PR via GitHub API
+      id-token: write   # Necesario para OIDC con Google Cloud Workload Identity Federation
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,12 +24,13 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}   # ← comentar si sos individual
 
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
 
+      # --- OIDC auth a Google Cloud — sin secrets, transparente para developers ---
       - name: Authenticate to Google Cloud (OIDC)
         uses: google-github-actions/auth@v2
         with:
@@ -39,12 +40,12 @@ jobs:
       - name: Configure npm for Artifact Registry
         run: |
           npm config set @agentic-suite:registry https://us-central1-npm.pkg.dev/development-test-456814/agentic-suite/
-          npx google-artifactregistry-auth --yes
+          npx google-artifactregistry-auth --yes                                                                                                                                                                         
 
       - name: Install Agentic CLI
         run: npm install -g @agentic-suite/cli
 
-      # NOTE: agentic check is a local pre-commit validation
-      # GitHub Actions runs: gitleaks only (secrets detection)
-      # Full governance check runs locally via pre-commit hook
-      # TODO (post-piloto): GitHub App auth for full CI/CD governance pipeline
+      - name: Run Guardian analysis
+        env:
+          AGENTIC_TOKEN: ${{ secrets.AGENTIC_TOKEN }}
+        run: agentic check --json --fail-under 60
