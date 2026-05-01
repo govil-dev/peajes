@@ -9,8 +9,11 @@ Repo generado por `agentic init`. Se detectaron las decisiones del stack a parti
 
 ## Decision
 
-- Lenguaje primario: **(detectar)**
-- Governance score mínimo (quality gate): **60/100**
+- Lenguaje primario: **java**
+- Framework: **spring-boot**
+- Build tool: **maven**
+- Test framework: **junit**
+- Governance score mínimo (quality gate): **75/100**
 
 ## Consequences
 

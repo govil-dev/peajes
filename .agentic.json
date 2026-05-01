@@ -1,9 +1,10 @@
 {
-  "project_code": "PEAJES-CO-01",
-  "project_name": "Peajes Colombia MVP",
+  "project_code": "PEAJES-CO",
+  "project_name": "Peajes Colombia - Operador electronico",
   "language": "Java",
-  "project_id": "58d60ad3-d369-4fbe-bff5-506ca40f71ff",
+  "project_id": "52ff1219-511d-4fcb-979e-910c6b638da6",
   "repo_url": "https://github.com/govil-dev/peajes.git",
   "default_branch": "main",
-  "framework": "Spring Boot 3.3.x + Spring WebFlux"
+  "framework": "Spring Boot",
+  "service_code": "peajes-co"
 }

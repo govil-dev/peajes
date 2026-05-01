@@ -1,125 +1,12 @@
 {
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: PII and Sensitive Data Handling Guidance\nObjective: Instruct on proper handling of PII and sensitive financial data according to privacy laws and PCI DSS before code generation or modification.\nTrigger: before tool execution on code that might handle sensitive data\nMatcher: Write|Edit|MultiEdit\nSource refs: c6de6d45-2b64-4524-b225-9bee71273e1b, Ley 1581/2012 — Habeas data y protección de datos personales: PII clasificada como dato sensible; almacenamiento cifrado en reposo (AES-256 vía Cloud SQL encryption); logs no contienen PII (enmascaramiento); derecho de supresión (endpoint DELETE /api/v1/accounts/{userId} con anonimización); aviso de privacidad y consentimiento explícito; registro de tratamiento de datos ante SIC., PCI DSS Nivel 4: Aplica para procesamiento de números de tarjeta (recargas PayU); PAN tokenizado (nunca se almacena completo, solo token de PayU); transmisión de datos de tarjeta siempre vía HTTPS/TLS 1.3; acceso a datos de tarjeta restringido por roles (FinanceAnalyst con 2FA); escaneo de vulnerabilidades trimestral (ASV externo); log de auditoría para accesos a datos de pago, retención 1 año mínimo., Seguridad de datos: Ningún campo PII en logs; PAN tokenizado en tránsito y en reposo., Logging: PII prohibida en logs; usar toMasked() para PII antes de loggear.\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-pii-data-handling-guidance"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: External Service Resilience Guidance\nObjective: Instruct on implementing resilience patterns (timeouts, circuit breakers, retries, fallbacks) for external service integrations.\nTrigger: before tool execution on code integrating with external services\nMatcher: Write|Edit|MultiEdit\nSource refs: 1a573d41-f7e9-42c1-8693-3da003102e62, fa28a475-5d69-4b7c-b9b0-09fd60a69654, f014f09a-8fca-442a-ab78-b98d5c032581, 9cb93807-f4b4-4c76-86c4-dade1c32d08e, Integraciones externas fijas: ANI (API REST propietaria, no existe OpenAPI spec, se integra vía adaptador con circuit breaker); Banco adquirente (SFTP + ISO 20022); PayU (SDK Java oficial)\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-external-resilience-guidance"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Financial Data Type Representation Guidance\nObjective: Instruct on using BigDecimal with scale 2 and MoneyAmount value objects for monetary amounts.\nTrigger: before tool execution on code handling financial data\nMatcher: Write|Edit|MultiEdit\nSource refs: 58c84ffe-71f3-456c-927d-1d2647c2b26b, 280e17f5-f799-4390-abec-9f5156240673, 152eb76e-66e2-4e56-9a26-27b7290af8f6\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-financial-datatype-guidance"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Kafka Idempotent Consumer Guidance\nObjective: Instruct on designing Kafka consumers with idempotency to handle duplicate messages for 'at-least-once' delivery.\nTrigger: before tool execution on code for Kafka consumers\nMatcher: Write|Edit|MultiEdit\nSource refs: 4f2ebe8b-ecaf-4b0a-841d-5649d6aa125f, ab3c0f85-9954-40c8-9b38-2425eee13781, 2ce684e1-dc0c-409e-a119-fb73906820c6, 6291d447-a826-4dc8-b458-54c61c276f1e\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-kafka-idempotency-guidance"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Logging Standards and PII Masking Guidance\nObjective: Instruct on mandatory MDC usage for correlation IDs and strict prohibition of PII in logs, requiring masking.\nTrigger: before tool execution on code that includes logging statements\nMatcher: Write|Edit|MultiEdit\nSource refs: Logging: MDC obligatorio por request para correlationId, tagId (enmascarado), stationId, traceId., Logging: PII prohibida en logs; usar toMasked() para PII antes de loggear., c6de6d45-2b64-4524-b225-9bee71273e1b\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-logging-standards-guidance"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Standardized Technology Stack Compliance Check\nObjective: Warn if generated code deviates from the mandatory technology stack (Java 21, Spring Boot 3.3, WebFlux, R2DBC, Kafka).\nTrigger: before tool execution on any code generation or modification\nMatcher: Write|Edit|MultiEdit\nSource refs: 2103332c-ad51-40c9-9e1c-b225264803a6, Stack técnico mandatorio: No negociable para el MVP. Todo código generado por asistentes de IA debe respetar estas versiones.\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "pretool-tech-stack-compliance-check"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Code and Javadoc Language Guidance\nObjective: Instruct on using English for code elements (packages, classes, methods, events) and Spanish for business-oriented Javadoc comments.\nTrigger: before tool execution on any code generation or modification\nMatcher: Write|Edit|MultiEdit\nSource refs: Idioma del código: Inglés para nombres de paquete, clases, métodos, eventos. Español en comentarios Javadoc orientados al negocio.\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-code-language-guidance"
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit",
+        "matcher": "Edit|Write",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Project hook: PII and Sensitive Data Handling Review\nObjective: Verify that generated or modified code correctly handles PII and sensitive financial data, including masking and tokenization, and avoids logging PII.\nTrigger: after tool execution on code that might handle sensitive data\nMatcher: Write|Edit|MultiEdit\nSource refs: c6de6d45-2b64-4524-b225-9bee71273e1b, Ley 1581/2012 — Habeas data y protección de datos personales: PII clasificada como dato sensible; almacenamiento cifrado en reposo (AES-256 vía Cloud SQL encryption); logs no contienen PII (enmascaramiento); derecho de supresión (endpoint DELETE /api/v1/accounts/{userId} con anonimización); aviso de privacidad y consentimiento explícito; registro de tratamiento de datos ante SIC., PCI DSS Nivel 4: Aplica para procesamiento de números de tarjeta (recargas PayU); PAN tokenizado (nunca se almacena completo, solo token de PayU); transmisión de datos de tarjeta siempre vía HTTPS/TLS 1.3; acceso a datos de tarjeta restringido por roles (FinanceAnalyst con 2FA); escaneo de vulnerabilidades trimestral (ASV externo); log de auditoría para accesos a datos de pago, retención 1 año mínimo., Seguridad de datos: Ningún campo PII en logs; PAN tokenizado en tránsito y en reposo., Logging: PII prohibida en logs; usar toMasked() para PII antes de loggear.\nAnswer 'ok' if the change satisfies the rule, or 'fail: <short reason>' if not.",
-            "id": "posttool-pii-data-handling-review"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: External Service Resilience Review\nObjective: Verify that generated or modified code for external service integrations includes appropriate resilience patterns.\nTrigger: after tool execution on code integrating with external services\nMatcher: Write|Edit|MultiEdit\nSource refs: 1a573d41-f7e9-42c1-8693-3da003102e62, fa28a475-5d69-4b7c-b9b0-09fd60a69654, f014f09a-8fca-442a-ab78-b98d5c032581, 9cb93807-f4b4-4c76-86c4-dade1c32d08e, Integraciones externas fijas: ANI (API REST propietaria, no existe OpenAPI spec, se integra vía adaptador con circuit breaker); Banco adquirente (SFTP + ISO 20022); PayU (SDK Java oficial)\nAnswer 'ok' if the change satisfies the rule, or 'fail: <short reason>' if not.",
-            "id": "posttool-external-resilience-review"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Financial Data Type Representation Review\nObjective: Verify that generated or modified code uses BigDecimal with scale 2 and MoneyAmount value objects for monetary amounts.\nTrigger: after tool execution on code handling financial data\nMatcher: Write|Edit|MultiEdit\nSource refs: 58c84ffe-71f3-456c-927d-1d2647c2b26b, 280e17f5-f799-4390-abec-9f5156240673, 152eb76e-66e2-4e56-9a26-27b7290af8f6\nAnswer 'ok' if the change satisfies the rule, or 'fail: <short reason>' if not.",
-            "id": "posttool-financial-datatype-review"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Kafka Idempotent Consumer Review\nObjective: Verify that generated or modified Kafka consumer code implements deduplication logic for idempotent processing.\nTrigger: after tool execution on code for Kafka consumers\nMatcher: Write|Edit|MultiEdit\nSource refs: 4f2ebe8b-ecaf-4b0a-841d-5649d6aa125f, ab3c0f85-9954-40c8-9b38-2425eee13781, 2ce684e1-dc0c-409e-a119-fb73906820c6, 6291d447-a826-4dc8-b458-54c61c276f1e\nAnswer 'ok' if the change satisfies the rule, or 'fail: <short reason>' if not.",
-            "id": "posttool-kafka-idempotency-review"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Logging Standards and PII Masking Review\nObjective: Verify that generated or modified code adheres to logging standards, including MDC and PII masking.\nTrigger: after tool execution on code that includes logging statements\nMatcher: Write|Edit|MultiEdit\nSource refs: Logging: MDC obligatorio por request para correlationId, tagId (enmascarado), stationId, traceId., Logging: PII prohibida en logs; usar toMasked() para PII antes de loggear., c6de6d45-2b64-4524-b225-9bee71273e1b\nAnswer 'ok' if the change satisfies the rule, or 'fail: <short reason>' if not.",
-            "id": "posttool-logging-standards-review"
+            "type": "command",
+            "command": "cfg=\"$HOME/.agentic/client-config.json\"; command -v jq >/dev/null 2>&1 || exit 0; [ -f \"$cfg\" ] || exit 0; key=$(jq -r '.guardian_api_key // empty' \"$cfg\" 2>/dev/null); [ -z \"$key\" ] && exit 0; url=\"${AGENTIC_AGENT_URL:-$(jq -r '.guardian_url // empty' \"$cfg\" 2>/dev/null)}\"; [ -z \"$url\" ] && exit 0; base=\"${url%%/agent/*}\"; input=$(cat); curl -sf -X POST \"$base/agent/check-partial\" -H \"X-API-Key: $key\" -H \"Content-Type: application/json\" -d \"$input\" >/dev/null 2>&1; exit 0"
           }
         ]
       },
@@ -128,8 +15,90 @@
         "hooks": [
           {
             "type": "command",
-            "command": "agentic check --partial",
+            "command": "cfg=\"$HOME/.agentic/client-config.json\"; command -v jq >/dev/null 2>&1 || exit 0; [ -f \"$cfg\" ] || exit 0; key=$(jq -r '.guardian_api_key // empty' \"$cfg\" 2>/dev/null); [ -z \"$key\" ] && exit 0; url=\"${AGENTIC_AGENT_URL:-$(jq -r '.guardian_url // empty' \"$cfg\" 2>/dev/null)}\"; [ -z \"$url\" ] && exit 0; base=\"${url%%/agent/*}\"; input=$(cat); curl -sf -X POST \"$base/agent/check-partial\" -H \"X-API-Key: $key\" -H \"Content-Type: application/json\" -d \"$input\" >/dev/null 2>&1; exit 0",
             "id": "guardian-post-edit"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Review Recharge Idempotency Implementation\nObjective: Verify that recharge transaction processing includes robust idempotency checks using `externalReferenceId` to prevent duplicate credits.\nTrigger: after tool execution on recharge transaction logic\nMatcher: Write|Edit|MultiEdit\nSource refs: fe4645b8-0c14-47ef-adb1-970bfce30bf7\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-recharge-idempotency-review"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Review Kafka Event Publishing\nObjective: Ensure domain events (`AccountRecharged`, `ManualOverrideRegistered`) are correctly published to Kafka topics with appropriate schemas and error handling.\nTrigger: after tool execution on event publishing logic\nMatcher: Write|Edit|MultiEdit\nSource refs: fe4645b8-0c14-47ef-adb1-970bfce30bf7, a08d2aa3-7139-4b9b-8347-5c0d3640c290, 8acb0625-9e4f-4042-9ede-4148f7b9baf2\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-kafka-event-publishing-review"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Review PayU Integration Resilience\nObjective: Verify the implementation of circuit breakers and retry mechanisms for the PayU integration as per business rules (timeout, failureRateThreshold, waitDurationInOpenState).\nTrigger: after tool execution on PayU integration code\nMatcher: Write|Edit|MultiEdit\nSource refs: fe4645b8-0c14-47ef-adb1-970bfce30bf7\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-payu-resilience-review"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Review Observability Metrics Implementation\nObjective: Verify that required metrics like `toll.manual_overrides.count` are correctly emitted with specified tags ('stationId', 'reason') for observability.\nTrigger: after tool execution on incident management or override logic\nMatcher: Write|Edit|MultiEdit\nSource refs: a08d2aa3-7139-4b9b-8347-5c0d3640c290\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-observability-metrics-review"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Review Timestamp Format and Timezone\nObjective: Ensure all timestamps, especially `lastUpdated`, are stored and returned in UTC ISO-8601 format as per business rules.\nTrigger: after tool execution on data models or API responses involving timestamps\nMatcher: Write|Edit|MultiEdit\nSource refs: a65808d3-cf05-4f7f-bab1-8edd769dbc75\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-timestamp-utc-iso8601-review"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Review API Error Handling and Exception Mapping\nObjective: Verify that API endpoints correctly map business exceptions to appropriate HTTP status codes (e.g., 404, 409, 401) as defined in use cases.\nTrigger: after tool execution on API controllers or exception handlers\nMatcher: Write|Edit|MultiEdit\nSource refs: a65808d3-cf05-4f7f-bab1-8edd769dbc75, a08d2aa3-7139-4b9b-8347-5c0d3640c290, fe4645b8-0c14-47ef-adb1-970bfce30bf7\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-api-error-handling-review"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Review Email Notification SLA Compliance\nObjective: Verify that the implementation supports sending email confirmations for successful recharges within the specified SLA of 30 seconds.\nTrigger: after tool execution on notification service logic\nMatcher: Write|Edit|MultiEdit\nSource refs: fe4645b8-0c14-47ef-adb1-970bfce30bf7\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-email-notification-sla-review"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Review Authentication and Authorization Logic\nObjective: Verify that authentication and authorization checks are correctly applied to secure API endpoints and actions as per use case requirements (e.g., authenticated UserCarrier, StationOperator).\nTrigger: after tool execution on security configuration or controller logic\nMatcher: Write|Edit|MultiEdit\nSource refs: a65808d3-cf05-4f7f-bab1-8edd769dbc75, a08d2aa3-7139-4b9b-8347-5c0d3640c290\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-authentication-authorization-review"
           }
         ]
       }
