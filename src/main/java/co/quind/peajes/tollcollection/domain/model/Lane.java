@@ -2,10 +2,12 @@ package co.quind.peajes.tollcollection.domain.model;
 
 import co.quind.peajes.tollcollection.domain.valueobject.LaneId;
 import co.quind.peajes.tollcollection.domain.valueobject.StationId;
+import java.util.UUID;
 
-/** Carril de una estación de peaje. */
-public record Lane(LaneId laneId, StationId stationId, LaneStatus status) {
-    public boolean isOpen() {
-        return status == LaneStatus.OPEN;
-    }
+public record Lane(UUID id, StationId stationId, String laneCode, LaneStatus status) {
+
+	public boolean isOpen() {
+		return status == LaneStatus.OPEN;
+	}
+
 }

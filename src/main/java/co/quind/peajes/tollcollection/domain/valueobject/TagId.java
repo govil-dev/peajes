@@ -1,22 +1,33 @@
 package co.quind.peajes.tollcollection.domain.valueobject;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
-/**
- * Identificador del tag RFID del vehículo. Se considera PII — usar toMasked() en logs.
- */
 public record TagId(String value) {
 
-    public TagId {
-        Objects.requireNonNull(value, "tagId value es requerido");
-        if (value.isBlank()) {
-            throw new IllegalArgumentException("tagId no puede ser vacío");
-        }
-    }
+	private static final Pattern TAG_ID_PATTERN = Pattern.compile("^[A-F0-9]{8}$");
 
-    /** Devuelve versión enmascarada segura para logs: ****XXXX (últimos 4 caracteres). */
-    public String toMasked() {
-        if (value.length() <= 4) return "****";
-        return "****" + value.substring(value.length() - 4);
-    }
+	public TagId {
+		Objects.requireNonNull(value, "value must not be null");
+		String upperValue = value.toUpperCase();
+		if (!TAG_ID_PATTERN.matcher(upperValue).matches()) {
+			throw new IllegalArgumentException(
+				"tagId must be 8 hex characters (A-F, 0-9): " + value);
+		}
+	}
+
+	public static TagId of(String value) {
+		return new TagId(value.toUpperCase());
+	}
+
+	public String toMasked() {
+		String upper = value.toUpperCase();
+		return "****" + upper.substring(4);
+	}
+
+	@Override
+	public String toString() {
+		return value.toUpperCase();
+	}
+
 }

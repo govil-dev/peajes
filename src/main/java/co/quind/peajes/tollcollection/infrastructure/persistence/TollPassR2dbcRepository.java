@@ -1,8 +1,12 @@
 package co.quind.peajes.tollcollection.infrastructure.persistence;
 
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import java.util.UUID;
+import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
-public interface TollPassR2dbcRepository extends ReactiveCrudRepository<TollPassEntity, String> {
-    Mono<TollPassEntity> findByPassId(String passId);
+@Repository
+public interface TollPassR2dbcRepository extends R2dbcRepository<TollPassEntity, UUID> {
+	Mono<TollPassEntity> findByPassId(String passId);
 }

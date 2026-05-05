@@ -4,27 +4,31 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
-/**
- * Identificador único de un paso vehicular. Formato: {tagId}-{yyyyMMdd'T'HHmmss'Z'}.
- * Ejemplo: A1B2C3D4-20250424T142305Z
- */
 public record PassId(String value) {
 
-    private static final DateTimeFormatter TS_FORMAT =
-            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'").withZone(ZoneOffset.UTC);
+	private static final Pattern PASS_ID_PATTERN =
+		Pattern.compile("^[A-F0-9]{8}-\\d{8}T\\d{6}Z$");
 
-    public PassId {
-        Objects.requireNonNull(value, "passId value es requerido");
-        if (value.isBlank()) {
-            throw new IllegalArgumentException("passId no puede ser vacío");
-        }
-    }
+	public PassId {
+		Objects.requireNonNull(value, "value must not be null");
+		if (!PASS_ID_PATTERN.matcher(value).matches()) {
+			throw new IllegalArgumentException(
+				"passId must match format {tagHex(8)}-{yyyyMMdd'T'HHmmss'Z'}: " + value);
+		}
+	}
 
-    /** Construye el passId canónico a partir del tagId y el instante de detección. */
-    public static PassId of(TagId tagId, Instant detectedAt) {
-        Objects.requireNonNull(tagId, "tagId es requerido");
-        Objects.requireNonNull(detectedAt, "detectedAt es requerido");
-        return new PassId(tagId.value() + "-" + TS_FORMAT.format(detectedAt));
-    }
+	public static PassId of(TagId tagId, Instant detectedAt) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
+			.withZone(ZoneOffset.UTC);
+		String timestamp = formatter.format(detectedAt);
+		return new PassId(tagId.value() + "-" + timestamp);
+	}
+
+	@Override
+	public String toString() {
+		return value;
+	}
+
 }
