@@ -1,10 +1,7 @@
----
-description: "Restricciones blocking del proyecto"
-globs: "**/*"
-alwaysApply: true
----
+# Constraints
 
-## Constraints
+> Generado por Guardian Suite (FACTORY-30). Fuente: TLM.
+
 - Presupuesto de infraestructura: ≤ USD 2.500/mes en GCP + Confluent Cloud para ambientes dev + staging + prod durante MVP
 - Deadline MVP: Q3 2025 — release a producción con el primer concesionario piloto
 - Integraciones externas fijas: ANI (API REST propietaria, no existe OpenAPI spec, se integra vía adaptador con circuit breaker); Banco adquirente (SFTP + ISO 20022); PayU (SDK Java oficial)

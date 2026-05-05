@@ -1,15 +1,58 @@
 {
   "hooks": {
-    "PostToolUse": [
+    "Stop": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "*",
         "hooks": [
           {
-            "type": "command",
-            "command": "cfg=\"$HOME/.agentic/client-config.json\"; command -v jq >/dev/null 2>&1 || exit 0; [ -f \"$cfg\" ] || exit 0; key=$(jq -r '.guardian_api_key // empty' \"$cfg\" 2>/dev/null); [ -z \"$key\" ] && exit 0; url=\"${AGENTIC_AGENT_URL:-$(jq -r '.guardian_url // empty' \"$cfg\" 2>/dev/null)}\"; [ -z \"$url\" ] && exit 0; base=\"${url%%/agent/*}\"; input=$(cat); curl -sf -X POST \"$base/agent/check-partial\" -H \"X-API-Key: $key\" -H \"Content-Type: application/json\" -d \"$input\" >/dev/null 2>&1; exit 0"
+            "type": "prompt",
+            "prompt": "Project hook: Verify External Service Resilience Patterns\nObjective: Confirm that interactions with external services implement required resilience patterns (timeouts, retries, circuit breakers, fallbacks).\nTrigger: after modifying code related to external service calls\nMatcher: Write|Edit|MultiEdit\nSource refs: coding-standard:external-service-integration-resilience, coding-standard:robust-external-service-integration, design-pattern:retry-pattern, design-pattern:fallback-pattern, use-case:HU-003, use-case:HU-005, use-case:HU-007\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-external-service-resilience-verification"
           }
         ]
       },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Verify Kafka Consumer Idempotency\nObjective: Ensure Kafka consumers are designed with idempotency to handle potential duplicate messages, especially for critical events.\nTrigger: after modifying Kafka consumer logic or event processing\nMatcher: Write|Edit|MultiEdit\nSource refs: coding-standard:kafka-event-delivery--idempotency, coding-standard:event-delivery-semantics, coding-standard:idempotent-event-processing, design-pattern:idempotent-consumer, use-case:HU-001, use-case:HU-003, use-case:HU-005, use-case:HU-007\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-kafka-idempotency-check"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Verify PCI DSS PAN Tokenization\nObjective: Confirm that Primary Account Numbers (PAN) are tokenized and never stored, adhering to PCI DSS Level 4.\nTrigger: after modifying code related to payment processing or sensitive financial data\nMatcher: Write|Edit|MultiEdit\nSource refs: constraint:PCI DSS Nivel 4: PAN tokenizado; nunca se almacena el PAN completo; se guarda el token de PayU., compliance-requirement:PCI DSS Nivel 4: Aplica para procesamiento de números de tarjeta (recargas PayU); PAN tokenizado (nunca se almacena completo, solo token de PayU);, use-case:HU-003\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-pci-dss-pan-tokenization-check"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Verify MDC Usage for Logging Correlation\nObjective: Confirm that MDC (Mapped Diagnostic Context) is used for `correlationId`, `tagId` (masked), `stationId`, and `traceId` in logs.\nTrigger: after modifying logging configurations or statements\nMatcher: Write|Edit|MultiEdit\nSource refs: constraint:Logging: MDC obligatorio por request para correlationId, tagId (enmascarado), stationId, traceId.\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-logging-mdc-correlation-check"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Project hook: Verify Data Validation and Constraints\nObjective: Confirm that string fields adhere to length limits and numeric fields enforce non-negativity, throwing specific exceptions on violation.\nTrigger: after modifying data models or input validation logic\nMatcher: Write|Edit|MultiEdit\nSource refs: coding-standard:data-validation--error-handling, coding-standard:data-validation-and-constraints\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
+            "id": "posttool-data-validation-constraints-check"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
       {
         "matcher": "Edit|Write",
         "hooks": [
@@ -17,88 +60,6 @@
             "type": "command",
             "command": "cfg=\"$HOME/.agentic/client-config.json\"; command -v jq >/dev/null 2>&1 || exit 0; [ -f \"$cfg\" ] || exit 0; key=$(jq -r '.guardian_api_key // empty' \"$cfg\" 2>/dev/null); [ -z \"$key\" ] && exit 0; url=\"${AGENTIC_AGENT_URL:-$(jq -r '.guardian_url // empty' \"$cfg\" 2>/dev/null)}\"; [ -z \"$url\" ] && exit 0; base=\"${url%%/agent/*}\"; input=$(cat); curl -sf -X POST \"$base/agent/check-partial\" -H \"X-API-Key: $key\" -H \"Content-Type: application/json\" -d \"$input\" >/dev/null 2>&1; exit 0",
             "id": "guardian-post-edit"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Review Recharge Idempotency Implementation\nObjective: Verify that recharge transaction processing includes robust idempotency checks using `externalReferenceId` to prevent duplicate credits.\nTrigger: after tool execution on recharge transaction logic\nMatcher: Write|Edit|MultiEdit\nSource refs: fe4645b8-0c14-47ef-adb1-970bfce30bf7\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-recharge-idempotency-review"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Review Kafka Event Publishing\nObjective: Ensure domain events (`AccountRecharged`, `ManualOverrideRegistered`) are correctly published to Kafka topics with appropriate schemas and error handling.\nTrigger: after tool execution on event publishing logic\nMatcher: Write|Edit|MultiEdit\nSource refs: fe4645b8-0c14-47ef-adb1-970bfce30bf7, a08d2aa3-7139-4b9b-8347-5c0d3640c290, 8acb0625-9e4f-4042-9ede-4148f7b9baf2\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-kafka-event-publishing-review"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Review PayU Integration Resilience\nObjective: Verify the implementation of circuit breakers and retry mechanisms for the PayU integration as per business rules (timeout, failureRateThreshold, waitDurationInOpenState).\nTrigger: after tool execution on PayU integration code\nMatcher: Write|Edit|MultiEdit\nSource refs: fe4645b8-0c14-47ef-adb1-970bfce30bf7\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-payu-resilience-review"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Review Observability Metrics Implementation\nObjective: Verify that required metrics like `toll.manual_overrides.count` are correctly emitted with specified tags ('stationId', 'reason') for observability.\nTrigger: after tool execution on incident management or override logic\nMatcher: Write|Edit|MultiEdit\nSource refs: a08d2aa3-7139-4b9b-8347-5c0d3640c290\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-observability-metrics-review"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Review Timestamp Format and Timezone\nObjective: Ensure all timestamps, especially `lastUpdated`, are stored and returned in UTC ISO-8601 format as per business rules.\nTrigger: after tool execution on data models or API responses involving timestamps\nMatcher: Write|Edit|MultiEdit\nSource refs: a65808d3-cf05-4f7f-bab1-8edd769dbc75\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-timestamp-utc-iso8601-review"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Review API Error Handling and Exception Mapping\nObjective: Verify that API endpoints correctly map business exceptions to appropriate HTTP status codes (e.g., 404, 409, 401) as defined in use cases.\nTrigger: after tool execution on API controllers or exception handlers\nMatcher: Write|Edit|MultiEdit\nSource refs: a65808d3-cf05-4f7f-bab1-8edd769dbc75, a08d2aa3-7139-4b9b-8347-5c0d3640c290, fe4645b8-0c14-47ef-adb1-970bfce30bf7\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-api-error-handling-review"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Review Email Notification SLA Compliance\nObjective: Verify that the implementation supports sending email confirmations for successful recharges within the specified SLA of 30 seconds.\nTrigger: after tool execution on notification service logic\nMatcher: Write|Edit|MultiEdit\nSource refs: fe4645b8-0c14-47ef-adb1-970bfce30bf7\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-email-notification-sla-review"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Review Authentication and Authorization Logic\nObjective: Verify that authentication and authorization checks are correctly applied to secure API endpoints and actions as per use case requirements (e.g., authenticated UserCarrier, StationOperator).\nTrigger: after tool execution on security configuration or controller logic\nMatcher: Write|Edit|MultiEdit\nSource refs: a65808d3-cf05-4f7f-bab1-8edd769dbc75, a08d2aa3-7139-4b9b-8347-5c0d3640c290\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-authentication-authorization-review"
           }
         ]
       }

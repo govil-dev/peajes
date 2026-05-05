@@ -7,9 +7,7 @@
 ## Comandos
 
 ```bash
-    ./mvnw clean verify
-    ./mvnw test
-    ./mvnw spring-boot:run
+    # Stack no detectado — agregar comandos manualmente
 ```
 
 ## Validación pre-commit

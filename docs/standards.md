@@ -1,10 +1,7 @@
----
-description: "Coding standards del proyecto"
-globs: "**/*"
-alwaysApply: true
----
+# Coding standards
 
-## Coding standards
+> Generado por Guardian Suite (FACTORY-30). Fuente: TLM.
+
 External Service Integration Resilience: Interactions with external services must implement resilience patterns such as timeouts, circuit breakers, retries, fallbacks, and fire-and-forget for non-critical asynchronous calls. [language=general] [category=inferred]
 Data Validation & Error Handling: String fields must adhere to specified length limits. Numeric fields (e.g., balances) must enforce non-negativity, throwing specific exceptions (e.g., `InsufficientBalanceException`) on violation. [language=general] [category=inferred]
 Financial Data Type Representation: Monetary amounts and balances must be represented as strings with decimal precision. Internally, BigDecimal with scale 2 should be used, and MoneyAmount value objects must preserve currency. [language=general] [category=inferred]
@@ -19,9 +16,3 @@ Enumerated String Values: Fields with a predefined set of options (e.g., resolut
 Financial Value Representation: Monetary amounts and balances (e.g., amount, balanceAfter, refundAmount) must be represented as strings with decimal precision. Internally, BigDecimal with scale 2 should be used, and MoneyAmount value objects must preserve currency. [language=general] [category=inferred]
 Timestamp Format (ISO 8601): All timestamp fields (e.g., openedAt, detectedAt, authorizedAt) must be represented as ISO 8601 formatted strings. [language=general] [category=inferred]
 Identifier Format (UUID): All unique identifiers (e.g., disputeId, accountId, transactionId) must be represented as UUID strings. [language=general] [category=inferred]
-
-## Patrones
-Value Object: Explicitly defined for immutable data types like `GovernanceScore`, `Severity`, and `CommitSha`, with validation performed in their constructors (`__post_init__`). [category=general]
-Retry Pattern: Applied to external service calls (e.g., DIAN proveedor tecnológico) to handle transient failures by re-attempting operations. [category=general]
-Fallback Pattern: Used in external service integrations (e.g., ANI API) to provide alternative behavior or cached data when the primary service is unavailable. [category=general]
-Idempotent Consumer: Implemented for event consumers (e.g., TollPassRegistered) to ensure events are processed only once, even if received multiple times, using unique identifiers like passId for deduplication. [category=general]

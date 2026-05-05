@@ -87,3 +87,4 @@ terraform.tfstate.*
 Thumbs.db
 
 # <<< QUIND CORPORATE GITIGNORE — end managed block <<<
+.agentic-run-mcp.json
