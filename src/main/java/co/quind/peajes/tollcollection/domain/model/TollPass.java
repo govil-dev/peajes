@@ -58,6 +58,12 @@ public final class TollPass {
 		return tollPass;
 	}
 
+	public static TollPass declineWithNote(PassId passId, TagId tagId, StationId stationId,
+										   LaneId laneId, DeclineReason reason, String operatorNote,
+										   Instant detectedAt) {
+		return decline(passId, tagId, stationId, laneId, reason, detectedAt);
+	}
+
 	private void raiseTollPassRegistered() {
 		domainEvents.add(new TollPassRegistered(
 			UUID.randomUUID().toString(),
