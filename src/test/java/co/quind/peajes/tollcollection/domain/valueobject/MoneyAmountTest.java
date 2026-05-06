@@ -49,4 +49,17 @@ class MoneyAmountTest {
 		assertFalse(b.isLessThan(a));
 	}
 
+	@Test
+	void toDisplayString_returnsFormattedWithCurrency() {
+		MoneyAmount amount = MoneyAmount.of(new BigDecimal("15000"));
+		assertEquals("15000.00 COP", amount.toDisplayString());
+	}
+
+	@Test
+	void isGreaterThanOrEqual_equalAmounts_returnsTrue() {
+		MoneyAmount a = MoneyAmount.of(new BigDecimal("50"));
+		MoneyAmount b = MoneyAmount.of(new BigDecimal("50"));
+		assertTrue(a.isGreaterThanOrEqual(b));
+	}
+
 }
