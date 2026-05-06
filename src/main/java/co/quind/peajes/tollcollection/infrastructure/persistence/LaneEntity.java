@@ -10,5 +10,6 @@ public record LaneEntity(
 	@Id UUID id,
 	@Column("station_id") UUID stationId,
 	@Column("lane_code") String laneCode,
-	@Column("status") String status
+	@Column("status") String status,
+	@Column("direction") String direction
 ) {}
