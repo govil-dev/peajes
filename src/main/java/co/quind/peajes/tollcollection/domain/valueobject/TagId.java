@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public record TagId(String value) {
 
-	private static final Pattern TAG_ID_PATTERN = Pattern.compile("^[A-F0-9]{8}$");
+	private static final Pattern TAG_ID_PATTERN = Pattern.compile("^[A-Fa-f0-9]{8}$");
 
 	public TagId {
 		Objects.requireNonNull(value, "value must not be null");
