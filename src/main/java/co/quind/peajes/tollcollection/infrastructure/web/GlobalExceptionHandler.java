@@ -51,6 +51,14 @@ public class GlobalExceptionHandler {
 			.body(ErrorResponse.of("VALIDATION_ERROR", details, null)));
 	}
 
+	@ExceptionHandler(LaneClosedException.class)
+	public Mono<ResponseEntity<ErrorResponse>> handleLaneClosed(LaneClosedException ex) {
+		log.warn("Lane closed for maintenance: {}", ex.getMessage());
+		return Mono.just(ResponseEntity
+			.status(HttpStatus.SERVICE_UNAVAILABLE)
+			.body(ErrorResponse.of("LANE_CLOSED", ex.getMessage(), null)));
+	}
+
 	@ExceptionHandler(Exception.class)
 	public Mono<ResponseEntity<ErrorResponse>> handleGenericException(Exception ex) {
 		log.error("Unexpected error", ex);
