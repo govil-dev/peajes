@@ -46,6 +46,10 @@ public class ProcessTollPassService implements ProcessTollPassUseCase {
 			.switchIfEmpty(processNewPass(passId, tagId, stationId, laneId, request));
 	}
 
+	private boolean isLaneBlocked(co.quind.peajes.tollcollection.domain.model.Lane lane) {
+		return !lane.isOpen();
+	}
+
 	private Mono<TollPassResponse> processNewPass(PassId passId, TagId tagId, StationId stationId,
 												  LaneId laneId, TollPassRequest request) {
 		VehicleClass vehicleClass = VehicleClass.valueOf(request.vehicleClass());
@@ -63,7 +67,7 @@ public class ProcessTollPassService implements ProcessTollPassUseCase {
 				var tariffConfig = tuple.getT2();
 
 				// Validate lane is open
-				if (!lane.isOpen()) {
+				if (isLaneBlocked(lane)) {
 					log.warn("Lane not open: laneId={}, status={}", laneId, lane.status());
 					TollPass declined = TollPass.decline(passId, tagId, stationId, laneId,
 						DeclineReason.LANE_NOT_OPEN, request.detectedAt());
