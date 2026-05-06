@@ -54,6 +54,10 @@ public record MoneyAmount(BigDecimal amount, String currency) {
 		return this.amount.compareTo(other.amount) >= 0;
 	}
 
+	/**
+	 * Retorna representación legible para UI y logs: "15000.00 COP".
+	 * Usar {@link #toJsonString()} para serialización hacia APIs externas.
+	 */
 	public String toDisplayString() {
 		return String.format("%s %s", amount.toPlainString(), currency);
 	}
