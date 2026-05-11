@@ -1,35 +1,35 @@
 ---
 name: skill-bounded-context-adherence
-description: "Organize code strictly according to the defined bounded contexts (e.g., `toll-collection`, `account-management`) and the `domain/`, `application/`, `infrastructure/` layered architecture to maintain modularity, separation of concerns, and team scalability."
+description: "Ensure code changes respect the boundaries and responsibilities of defined bounded contexts (e.g., `toll-collection`, `account-management`, `billing`), promoting modularity and maintainability."
 metadata:
   framework_principle: P5
-  enforcement_mode: verify
-  criticality_level: [standard]
+  enforcement_mode: instruct
+  criticality_level: [light]
 ---
 
-# Bounded Context and Layered Architecture Adherence
+# Bounded Context Adherence and Separation of Concerns
 
 ## Objetivo
-Organize code strictly according to the defined bounded contexts (e.g., `toll-collection`, `account-management`) and the `domain/`, `application/`, `infrastructure/` layered architecture to maintain modularity, separation of concerns, and team scalability.
+Ensure code changes respect the boundaries and responsibilities of defined bounded contexts (e.g., `toll-collection`, `account-management`, `billing`), promoting modularity and maintainability.
 
 ## Trigger
-during development
+on code generation or modification
 
 ## Inputs
-- project structure definition
-- domain definition
-- new feature requirements
+- Java package structure
+- Service and repository interfaces
+- Domain event definitions
 
 ## Procedimiento
-1. Identify the bounded context for each new feature or component.
-2. Place code in the correct package structure (`co.quind.peajes.<context>.<layer>`).
-3. Ensure dependencies flow inward (infrastructure depends on application, application on domain).
-4. Conduct regular code reviews to enforce architectural boundaries.
-5. Avoid cross-context direct dependencies; use explicit interfaces or eventing for communication.
+1. Identify the bounded context to which the change belongs.
+2. Verify that code modifications are contained within the appropriate package structure (e.g., `co.quind.peajes.tollcollection`).
+3. Check that direct dependencies between bounded contexts are minimized and mediated through explicit interfaces or events, rather than direct class coupling.
+4. Ensure that business logic specific to one context does not leak into another (e.g., `account-management` is the sole authority for balance modification).
 
 ## Output esperado
-Codebase with clear architectural boundaries, high cohesion within contexts, and low coupling between them.
+Code changes respect bounded context boundaries, promoting a clear separation of concerns and modular architecture.
 
 ## Source refs (project)
-- 9eef6827-df7c-4dae-b331-b0ff0bf37f38
-- 67da1b6c-bc3a-496a-a296-80178668e6e5
+- domain_definition
+- structure_definition
+- HU-003

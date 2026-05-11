@@ -6,4 +6,5 @@ import reactor.core.publisher.Mono;
 public interface EventPublisherPort {
     Mono<Void> publishToTransactions(Object event);
     Mono<Void> publishToAccounts(Object event);
+	Mono<Void> publishToIncidents(Object event);
 }

@@ -3,6 +3,6 @@ version: 0.1.0
 schema: v1
 
 rules:
-  - "External Service Integration Resilience: Interactions with external services must implement resilience patterns such as timeouts, circuit breakers, retries, fallbacks, and fire-and-forget for non-critical asynchronous calls. [language=general] [category=inferred] Data Validation & Error Handling: String fields must adhere to specified length limits. Numeric fields (e.g., balances) must enforce non-negativity, throwing specific exceptions (e.g., `InsufficientBalanceException`) on violation. [lang"
+  - "Identifier Format (UUID): All unique identifiers (e.g., disputeId, accountId, transactionId) must be represented as UUID strings. [language=general] [category=inferred] Timestamp Format (ISO 8601): All timestamp fields (e.g., openedAt, detectedAt, authorizedAt) must be represented as ISO 8601 formatted strings. [language=general] [category=inferred] Financial Value Representation: Monetary amounts and balances (e.g., amount, balanceAfter, refundAmount) must be represented as strings with decimal"
 
 docs: []
