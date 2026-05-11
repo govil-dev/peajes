@@ -23,7 +23,8 @@ public record TollPassResult(
     public static TollPassResult fromExisting(TollPass pass) {
         return new TollPassResult(
                 pass.passId().value(), pass.status(),
-                pass.amount().toDecimalString(), pass.amount().currency(),
+                pass.amount() != null ? pass.amount().toDecimalString() : null,
+                pass.amount() != null ? pass.amount().currency() : "COP",
                 pass.declineReason(), pass.processedAt().toString(), true
         );
     }
@@ -31,7 +32,8 @@ public record TollPassResult(
     public static TollPassResult authorized(TollPass pass) {
         return new TollPassResult(
                 pass.passId().value(), TransactionStatus.AUTHORIZED,
-                pass.amount().toDecimalString(), pass.amount().currency(),
+                pass.amount() != null ? pass.amount().toDecimalString() : null,
+                pass.amount() != null ? pass.amount().currency() : "COP",
                 null, pass.processedAt().toString(), false
         );
     }
@@ -39,7 +41,8 @@ public record TollPassResult(
     public static TollPassResult declined(TollPass pass) {
         return new TollPassResult(
                 pass.passId().value(), TransactionStatus.DECLINED,
-                pass.amount().toDecimalString(), pass.amount().currency(),
+                pass.amount() != null ? pass.amount().toDecimalString() : null,
+                pass.amount() != null ? pass.amount().currency() : "COP",
                 pass.declineReason(), pass.processedAt().toString(), false
         );
     }

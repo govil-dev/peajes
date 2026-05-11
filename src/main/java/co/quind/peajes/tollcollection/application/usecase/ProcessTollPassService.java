@@ -1,116 +1,178 @@
 package co.quind.peajes.tollcollection.application.usecase;
 
-import co.quind.peajes.tollcollection.application.dto.TollPassRequest;
-import co.quind.peajes.tollcollection.application.dto.TollPassResponse;
-import co.quind.peajes.tollcollection.domain.exception.InsufficientBalanceException;
-import co.quind.peajes.tollcollection.domain.model.DeclineReason;
-import co.quind.peajes.tollcollection.domain.model.TollPass;
-import co.quind.peajes.tollcollection.domain.model.VehicleClass;
+import co.quind.peajes.tollcollection.application.command.ProcessTollPassCommand;
+import co.quind.peajes.tollcollection.application.dto.AccountDetails;
+import co.quind.peajes.tollcollection.application.dto.TollPassResult;
+import co.quind.peajes.tollcollection.domain.event.AccountBalanceLow;
+import co.quind.peajes.tollcollection.domain.model.*;
 import co.quind.peajes.tollcollection.domain.port.in.ProcessTollPassUseCase;
 import co.quind.peajes.tollcollection.domain.port.out.*;
 import co.quind.peajes.tollcollection.domain.valueobject.*;
-import lombok.RequiredArgsConstructor;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ProcessTollPassService implements ProcessTollPassUseCase {
 
 	private final TollPassRepository tollPassRepository;
+	private final TariffRepository tariffRepository;
 	private final LaneRepository laneRepository;
-	private final TariffConfigRepository tariffConfigRepository;
 	private final AccountManagementPort accountManagementPort;
-	private final DomainEventPublisher eventPublisher;
+	private final EventPublisherPort eventPublisher;
+	private final BarrierControlPort barrierControl;
+	private final MoneyAmount balanceAlertThreshold;
+
+	public ProcessTollPassService(
+			TollPassRepository tollPassRepository,
+			TariffRepository tariffRepository,
+			LaneRepository laneRepository,
+			AccountManagementPort accountManagementPort,
+			EventPublisherPort eventPublisher,
+			BarrierControlPort barrierControl,
+			@Value("${toll.balance.alert.threshold:15000.00}") String thresholdAmount,
+			@Value("${toll.balance.alert.currency:COP}") String thresholdCurrency) {
+		this.tollPassRepository = tollPassRepository;
+		this.tariffRepository = tariffRepository;
+		this.laneRepository = laneRepository;
+		this.accountManagementPort = accountManagementPort;
+		this.eventPublisher = eventPublisher;
+		this.barrierControl = barrierControl;
+		this.balanceAlertThreshold = MoneyAmount.of(thresholdAmount, thresholdCurrency);
+	}
 
 	@Override
-	public Mono<TollPassResponse> process(TollPassRequest request) {
-		PassId passId = PassId.of(TagId.of(request.tagId()), request.detectedAt());
-		TagId tagId = TagId.of(request.tagId());
-		StationId stationId = StationId.of(request.stationId());
-		LaneId laneId = LaneId.of(request.laneId());
+	public Mono<TollPassResult> process(ProcessTollPassCommand command) {
+		PassId passId = PassId.of(TagId.of(command.tagId()), command.detectedAt());
+		TagId tagId = TagId.of(command.tagId());
+		StationId stationId = StationId.of(command.stationId());
+		LaneId laneId = LaneId.of(command.laneId());
+		VehicleClass vehicleClass = VehicleClass.valueOf(command.vehicleClass());
 
 		log.info("Processing toll pass: passId={}, tagId={}", passId, tagId.toMasked());
 
-		// Idempotency check
 		return tollPassRepository.findByPassId(passId)
 			.map(existing -> {
 				log.info("TollPass already processed (idempotent): passId={}", passId);
-				return TollPassResponse.fromExisting(existing);
+				return TollPassResult.fromExisting(existing);
 			})
-			.switchIfEmpty(processNewPass(passId, tagId, stationId, laneId, request));
+			.switchIfEmpty(Mono.defer(() -> processNew(passId, tagId, stationId, laneId, vehicleClass, command)));
 	}
 
-	private boolean isLaneBlocked(co.quind.peajes.tollcollection.domain.model.Lane lane) {
+	private Mono<TollPassResult> processNew(PassId passId, TagId tagId, StationId stationId,
+											LaneId laneId, VehicleClass vehicleClass,
+											ProcessTollPassCommand command) {
+		return laneRepository.findByLaneIdAndStationId(laneId, stationId)
+			.flatMap(lane -> isLaneBlocked(lane)
+				? handleLaneBlocked(passId, tagId, stationId, laneId, command)
+				: handleOpenLane(passId, tagId, stationId, laneId, vehicleClass, command));
+	}
+
+	private boolean isLaneBlocked(Lane lane) {
 		return !lane.isOpen();
 	}
 
-	private Mono<TollPassResponse> processNewPass(PassId passId, TagId tagId, StationId stationId,
-												  LaneId laneId, TollPassRequest request) {
-		VehicleClass vehicleClass = VehicleClass.valueOf(request.vehicleClass());
+	private Mono<TollPassResult> handleLaneBlocked(PassId passId, TagId tagId, StationId stationId,
+													LaneId laneId, ProcessTollPassCommand command) {
+		log.warn("Lane not open: laneId={}", laneId);
+		return saveAndPublish(TollPass.decline(passId, tagId, stationId, laneId,
+			DeclineReason.LANE_NOT_OPEN, command.detectedAt()));
+	}
 
-		// Parallel lookups: lane + tariff
-		return Mono.zip(
-				laneRepository.findByLaneId(laneId)
-					.doOnNext(lane -> log.debug("Lane loaded: laneId={}, status={}", laneId, lane.status())),
-				tariffConfigRepository.findActiveByStationAndClass(stationId, vehicleClass)
-					.doOnNext(tariff -> log.debug("Tariff loaded: station={}, class={}, amount={}",
-						stationId, vehicleClass, tariff.amount().toDisplayString()))
-			)
-			.flatMap(tuple -> {
-				var lane = tuple.getT1();
-				var tariffConfig = tuple.getT2();
+	private Mono<TollPassResult> handleOpenLane(PassId passId, TagId tagId, StationId stationId,
+												 LaneId laneId, VehicleClass vehicleClass,
+												 ProcessTollPassCommand command) {
+		return tariffRepository.findActiveByStationAndVehicleClass(stationId, vehicleClass)
+			.flatMap(tariff -> accountManagementPort.getAccountByTag(tagId)
+				.flatMap(account -> evaluateAccount(passId, tagId, stationId, laneId, vehicleClass, command, tariff, account))
+				.onErrorResume(ex -> ex instanceof CallNotPermittedException || ex instanceof TimeoutException,
+					ex -> handleAccountServiceError(passId, tagId, stationId, laneId, command, ex)));
+	}
 
-				// Validate lane is open
-				if (isLaneBlocked(lane)) {
-					log.warn("Lane not open: laneId={}, status={}", laneId, lane.status());
-					TollPass declined = TollPass.decline(passId, tagId, stationId, laneId,
-						DeclineReason.LANE_NOT_OPEN, request.detectedAt());
-					return saveAndPublish(declined);
-				}
+	private Mono<TollPassResult> evaluateAccount(PassId passId, TagId tagId, StationId stationId,
+												  LaneId laneId, VehicleClass vehicleClass,
+												  ProcessTollPassCommand command,
+												  TariffConfig tariff,
+												  AccountDetails account) {
+		if (account.tagStatus() == TagStatus.INACTIVE || account.tagStatus() == TagStatus.SUSPENDED) {
+			log.warn("Tag inactive/suspended: tagId={}", tagId.toMasked());
+			return saveAndPublish(TollPass.decline(passId, tagId, stationId, laneId,
+				DeclineReason.TAG_INACTIVE, command.detectedAt()));
+		}
+		if (account.balance().isLessThan(tariff.amount())) {
+			log.warn("Insufficient balance: tagId={}", tagId.toMasked());
+			TollPass declined = TollPass.declined(passId, tagId, stationId, laneId,
+				vehicleClass, tariff.amount(), DeclineReason.INSUFFICIENT_BALANCE, command.detectedAt());
+			return saveAndPublish(declined)
+				.flatMap(result -> notifyOperator(laneId, "INSUFFICIENT_BALANCE").thenReturn(result));
+		}
+		return deductAndAuthorize(passId, tagId, stationId, laneId, vehicleClass, command, tariff);
+	}
 
-				// Deduct balance with CB + timeout
-				return accountManagementPort.deductBalance(tagId, tariffConfig.amount(), passId)
-					.flatMap(snapshot -> {
-						log.info("Balance deducted successfully: tagId={}, balanceAfter={}",
-							tagId.toMasked(), snapshot.balance().toDisplayString());
-						TollPass authorized = TollPass.authorize(passId, tagId, stationId, laneId,
-							vehicleClass, tariffConfig.amount(), request.detectedAt());
-						return saveAndPublish(authorized);
-					})
-					.onErrorResume(InsufficientBalanceException.class, ex -> {
-						log.warn("Insufficient balance: tagId={}, message={}",
-							tagId.toMasked(), ex.getMessage());
-						TollPass declined = TollPass.decline(passId, tagId, stationId, laneId,
-							DeclineReason.INSUFFICIENT_BALANCE, request.detectedAt());
-						return saveAndPublish(declined);
-					})
-					.onErrorResume(Exception.class, ex -> {
-						log.error("System error processing toll pass: passId={}, tagId={}, error={}",
-							passId, tagId.toMasked(), ex.getMessage(), ex);
-						TollPass declined = TollPass.decline(passId, tagId, stationId, laneId,
-							DeclineReason.SYSTEM_ERROR, request.detectedAt());
-						return saveAndPublish(declined);
-					});
+	private Mono<TollPassResult> deductAndAuthorize(PassId passId, TagId tagId, StationId stationId,
+													 LaneId laneId, VehicleClass vehicleClass,
+													 ProcessTollPassCommand command,
+													 TariffConfig tariff) {
+		return accountManagementPort.deductBalance(tagId, tariff.amount(), passId)
+			.flatMap(newBalance -> {
+				log.info("Balance deducted: tagId={}, balanceAfter={}", tagId.toMasked(), newBalance.toDisplayString());
+				TollPass authorized = TollPass.authorize(passId, tagId, stationId, laneId, vehicleClass,
+					tariff.amount(), command.detectedAt());
+				return saveAndPublish(authorized)
+					.flatMap(result -> barrierControl.openBarrier(laneId)
+						.then(alertIfLowBalance(newBalance, tagId))
+						.thenReturn(result));
 			});
 	}
 
-	private Mono<TollPassResponse> saveAndPublish(TollPass tollPass) {
+	private Mono<TollPassResult> handleAccountServiceError(PassId passId, TagId tagId, StationId stationId,
+														   LaneId laneId, ProcessTollPassCommand command,
+														   Throwable ex) {
+		log.error("Account service unavailable ({}): passId={}", ex.getClass().getSimpleName(), passId);
+		return saveAndPublish(TollPass.decline(passId, tagId, stationId, laneId,
+			DeclineReason.SYSTEM_ERROR, command.detectedAt()));
+	}
+
+	private Mono<TollPassResult> saveAndPublish(TollPass tollPass) {
 		var events = tollPass.pullDomainEvents();
 		return tollPassRepository.save(tollPass)
 			.doOnNext(saved -> log.info("TollPass saved: passId={}, status={}", saved.passId(), saved.status()))
-			.flatMap(saved ->
-				eventPublisher.publishAll(events)
-					.then(Mono.just(saved))
-					.doOnSuccess(s -> log.info("Domain events published: count={}", events.size()))
-			)
-			.map(TollPassResponse::from)
+			.flatMap(saved -> publishEvents(events).thenReturn(saved))
+			.map(saved -> saved.status() == TransactionStatus.AUTHORIZED
+				? TollPassResult.authorized(saved)
+				: TollPassResult.declined(saved))
 			.doOnError(ex -> log.error("Error saving/publishing toll pass", ex));
 	}
 
+	private Mono<Void> publishEvents(java.util.List<Object> events) {
+		return reactor.core.publisher.Flux.fromIterable(events)
+			.flatMap(event -> event instanceof AccountBalanceLow
+				? eventPublisher.publishToAccounts(event)
+				: eventPublisher.publishToTransactions(event))
+			.then();
+	}
+
+	private Mono<Void> notifyOperator(LaneId laneId, String reason) {
+		return barrierControl.notifyOperator(laneId, reason)
+			.doOnError(ex -> log.warn("Failed to notify operator: laneId={}", laneId));
+	}
+
+	private Mono<Void> alertIfLowBalance(MoneyAmount balance, TagId tagId) {
+		if (balance.isLessThan(balanceAlertThreshold)) {
+			return eventPublisher.publishToAccounts(new AccountBalanceLow(
+				java.util.UUID.randomUUID().toString(),
+				null,
+				tagId.value(),
+				balance.currency(),
+				balanceAlertThreshold.amount().toPlainString(),
+				java.time.Instant.now().toString()
+			));
+		}
+		return Mono.empty();
+	}
 }

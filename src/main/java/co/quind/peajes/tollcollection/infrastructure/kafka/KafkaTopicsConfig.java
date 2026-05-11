@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
-public class KafkaConfig {
+public class KafkaTopicsConfig {
 
 	@Bean
 	public NewTopic tollPassesTopic() {

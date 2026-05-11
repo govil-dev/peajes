@@ -1,39 +1,39 @@
 ---
 name: skill-kafka-idempotent-consumer
-description: "Design and implement Kafka consumers to process events exactly once, preventing duplicate operations and ensuring data consistency, especially for critical transactions like account recharges or toll passes."
+description: "Confirm that all Kafka consumers for critical events implement robust deduplication logic using unique identifiers to ensure operations are processed exactly once, even if messages are received multiple times."
 metadata:
   framework_principle: P5
   enforcement_mode: verify
   criticality_level: [standard]
 ---
 
-# Implement Idempotent Kafka Event Consumers
+# Kafka Idempotent Consumer Verification
 
 ## Objetivo
-Design and implement Kafka consumers to process events exactly once, preventing duplicate operations and ensuring data consistency, especially for critical transactions like account recharges or toll passes.
+Confirm that all Kafka consumers for critical events implement robust deduplication logic using unique identifiers to ensure operations are processed exactly once, even if messages are received multiple times.
 
 ## Trigger
-on code change in Kafka consumer modules
+on code review
 
 ## Inputs
 - Kafka consumer code
-- Event schemas
+- Database schemas for event tracking
+- Redis usage patterns
 
 ## Procedimiento
-1. Identify critical events that require idempotent processing (e.g., `AccountRecharged`, `TransactionAuthorized`).
-2. Extract a unique identifier (e.g., `passId`, `externalReferenceId`) from each incoming event.
-3. Before processing, check if the unique identifier has already been processed and recorded.
-4. If processed, return the original result or log as a duplicate without re-executing the business logic. If not, process and record the identifier.
-5. Ensure the recording of processed identifiers is atomic with the business operation.
+1. Identify all Kafka consumer implementations for critical business events (e.g., `TollPassRegistered`, `AccountRecharged`).
+2. Verify the presence of a deduplication mechanism (e.g., storing processed event IDs in a persistent store like Redis or database).
+3. Ensure that unique identifiers (e.g., `passId`, `externalReferenceId`) are consistently used for deduplication checks.
+4. Review the logic to handle duplicate messages: return the result of the first processing without re-executing the business logic.
+5. Check for proper error handling and logging in case of deduplication failures or unexpected states.
 
 ## Output esperado
-Kafka consumers correctly handle duplicate messages, ensuring business operations are applied only once.
+Kafka consumers that reliably process events exactly once, preventing data inconsistencies from duplicate messages.
 
 ## Source refs (project)
-- 4f2ebe8b-ecaf-4b0a-841d-5649d6aa125f
-- ab3c0f85-9954-40c8-9b38-2425eee13781
-- 2ce684e1-dc0c-409e-a119-fb73906820c6
-- 6291d447-a826-4dc8-b458-54c61c276f1e
-- HU-001:business_rules:1
-- HU-003:business_rules:2
-- HU-005:acceptance_criteria:5
+- kafka-event-delivery--idempotency
+- event-delivery-semantics
+- idempotent-event-processing
+- idempotent-consumer
+- HU-001
+- HU-003

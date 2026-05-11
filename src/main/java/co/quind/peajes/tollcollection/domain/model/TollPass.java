@@ -4,7 +4,6 @@ import co.quind.peajes.tollcollection.domain.event.*;
 import co.quind.peajes.tollcollection.domain.valueobject.*;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,13 +16,14 @@ public final class TollPass {
 	private final VehicleClass vehicleClass;
 	private final MoneyAmount tariff;
 	private final Instant detectedAt;
-	private TollPassStatus status;
-	private DeclineReason declineReason;
+	private final Instant processedAt;
+	private final TransactionStatus status;
+	private final DeclineReason declineReason;
 	private final List<Object> domainEvents = new ArrayList<>();
 
 	private TollPass(UUID id, PassId passId, TagId tagId, StationId stationId, LaneId laneId,
 					VehicleClass vehicleClass, MoneyAmount tariff, Instant detectedAt,
-					TollPassStatus status, DeclineReason declineReason) {
+					Instant processedAt, TransactionStatus status, DeclineReason declineReason) {
 		this.id = id;
 		this.passId = passId;
 		this.tagId = tagId;
@@ -32,6 +32,7 @@ public final class TollPass {
 		this.vehicleClass = vehicleClass;
 		this.tariff = tariff;
 		this.detectedAt = detectedAt;
+		this.processedAt = processedAt;
 		this.status = status;
 		this.declineReason = declineReason;
 	}
@@ -40,16 +41,37 @@ public final class TollPass {
 									 LaneId laneId, VehicleClass vehicleClass,
 									 MoneyAmount tariff, Instant detectedAt) {
 		TollPass tollPass = new TollPass(UUID.randomUUID(), passId, tagId, stationId, laneId,
-			vehicleClass, tariff, detectedAt, TollPassStatus.AUTHORIZED, null);
+			vehicleClass, tariff, detectedAt, Instant.now(), TransactionStatus.AUTHORIZED, null);
 		tollPass.raiseTollPassRegistered();
 		tollPass.raiseTransactionAuthorized();
 		return tollPass;
 	}
 
+	/** Alias of {@link #authorize} for test builders. */
+	public static TollPass authorized(PassId passId, TagId tagId, StationId stationId,
+									  LaneId laneId, VehicleClass vehicleClass,
+									  MoneyAmount tariff, Instant detectedAt) {
+		return authorize(passId, tagId, stationId, laneId, vehicleClass, tariff, detectedAt);
+	}
+
 	public static TollPass decline(PassId passId, TagId tagId, StationId stationId,
-								  LaneId laneId, DeclineReason reason, Instant detectedAt) {
+								   LaneId laneId, DeclineReason reason, Instant detectedAt) {
 		TollPass tollPass = new TollPass(UUID.randomUUID(), passId, tagId, stationId, laneId,
-			null, null, detectedAt, TollPassStatus.DECLINED, reason);
+			null, null, detectedAt, Instant.now(), TransactionStatus.DECLINED, reason);
+		tollPass.raiseTollPassRegistered();
+		tollPass.raiseTransactionDeclined();
+		if (reason == DeclineReason.INSUFFICIENT_BALANCE) {
+			tollPass.raiseAccountBalanceLow();
+		}
+		return tollPass;
+	}
+
+	/** Full-context decline used when vehicleClass and tariff are known (e.g. balance check). */
+	public static TollPass declined(PassId passId, TagId tagId, StationId stationId,
+									LaneId laneId, VehicleClass vehicleClass, MoneyAmount tariff,
+									DeclineReason reason, Instant detectedAt) {
+		TollPass tollPass = new TollPass(UUID.randomUUID(), passId, tagId, stationId, laneId,
+			vehicleClass, tariff, detectedAt, Instant.now(), TransactionStatus.DECLINED, reason);
 		tollPass.raiseTollPassRegistered();
 		tollPass.raiseTransactionDeclined();
 		if (reason == DeclineReason.INSUFFICIENT_BALANCE) {
@@ -62,6 +84,15 @@ public final class TollPass {
 										   LaneId laneId, DeclineReason reason, String operatorNote,
 										   Instant detectedAt) {
 		return decline(passId, tagId, stationId, laneId, reason, detectedAt);
+	}
+
+	/** Reconstructs a TollPass from persisted state — does NOT raise domain events. */
+	public static TollPass fromPersisted(UUID id, PassId passId, TagId tagId, StationId stationId,
+										 LaneId laneId, VehicleClass vehicleClass, MoneyAmount tariff,
+										 TransactionStatus status, DeclineReason declineReason,
+										 Instant detectedAt, Instant processedAt) {
+		return new TollPass(id, passId, tagId, stationId, laneId, vehicleClass, tariff,
+			detectedAt, processedAt, status, declineReason);
 	}
 
 	private void raiseTollPassRegistered() {
@@ -80,7 +111,7 @@ public final class TollPass {
 	}
 
 	private void raiseTransactionAuthorized() {
-		if (status == TollPassStatus.AUTHORIZED) {
+		if (status == TransactionStatus.AUTHORIZED) {
 			domainEvents.add(new TransactionAuthorized(
 				UUID.randomUUID().toString(),
 				passId.value(),
@@ -122,7 +153,6 @@ public final class TollPass {
 		return events;
 	}
 
-	// Getters
 	public UUID id() { return id; }
 	public PassId passId() { return passId; }
 	public TagId tagId() { return tagId; }
@@ -130,8 +160,11 @@ public final class TollPass {
 	public LaneId laneId() { return laneId; }
 	public VehicleClass vehicleClass() { return vehicleClass; }
 	public MoneyAmount tariff() { return tariff; }
+	/** Alias for {@link #tariff()} — used by persistence and result mappers. */
+	public MoneyAmount amount() { return tariff; }
 	public Instant detectedAt() { return detectedAt; }
-	public TollPassStatus status() { return status; }
+	public Instant processedAt() { return processedAt; }
+	public TransactionStatus status() { return status; }
 	public DeclineReason declineReason() { return declineReason; }
 
 }

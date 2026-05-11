@@ -29,33 +29,35 @@ public class TollPassPersistenceAdapter implements TollPassRepository {
     }
 
     private TollPassEntity toEntity(TollPass p) {
-        var e = new TollPassEntity();
-        e.setPassId(p.passId().value());
-        e.setTagId(p.tagId().value());
-        e.setStationId(p.stationId().value());
-        e.setLaneId(p.laneId().value());
-        e.setVehicleClass(p.vehicleClass().name());
-        e.setAmount(p.amount().amount());
-        e.setCurrency(p.amount().currency());
-        e.setStatus(p.status().name());
-        e.setDeclineReason(p.declineReason() != null ? p.declineReason().name() : null);
-        e.setDetectedAt(p.detectedAt());
-        e.setProcessedAt(p.processedAt());
-        return e;
+        return new TollPassEntity(
+                p.id(),
+                p.passId().value(),
+                p.tagId().value(),
+                p.stationId().value(),
+                p.laneId().value(),
+                p.vehicleClass() != null ? p.vehicleClass().name() : null,
+                p.amount() != null ? p.amount().amount() : null,
+                p.amount() != null ? p.amount().currency() : "COP",
+                p.status().name(),
+                p.declineReason() != null ? p.declineReason().name() : null,
+                p.detectedAt(),
+                p.processedAt()
+        );
     }
 
     private TollPass toDomain(TollPassEntity e) {
-        return new TollPass(
-                new PassId(e.getPassId()),
-                new TagId(e.getTagId()),
-                new StationId(e.getStationId()),
-                new LaneId(e.getLaneId()),
-                VehicleClass.valueOf(e.getVehicleClass()),
-                new MoneyAmount(e.getAmount(), e.getCurrency()),
-                TransactionStatus.valueOf(e.getStatus()),
-                e.getDeclineReason() != null ? DeclineReason.valueOf(e.getDeclineReason()) : null,
-                e.getDetectedAt(),
-                e.getProcessedAt()
+        return TollPass.fromPersisted(
+                e.id(),
+                new PassId(e.passId()),
+                new TagId(e.tagId()),
+                new StationId(e.stationId()),
+                new LaneId(e.laneId()),
+                e.vehicleClass() != null ? VehicleClass.valueOf(e.vehicleClass()) : null,
+                e.tariffAmount() != null ? new MoneyAmount(e.tariffAmount(), e.currency()) : null,
+                TransactionStatus.valueOf(e.status()),
+                e.declineReason() != null ? DeclineReason.valueOf(e.declineReason()) : null,
+                e.detectedAt(),
+                e.processedAt()
         );
     }
 }

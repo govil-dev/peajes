@@ -30,6 +30,16 @@ public class KafkaEventPublisherAdapter implements DomainEventPublisher {
 
 	@Override
 	public Mono<Void> publish(Object domainEvent) {
+		return publishOne(domainEvent);
+	}
+
+	@Override
+	public Flux<Void> publishAll(List<Object> domainEvents) {
+		return Flux.fromIterable(domainEvents)
+			.concatMap(this::publishOne);
+	}
+
+	private Mono<Void> publishOne(Object domainEvent) {
 		String topic = getTopicForEvent(domainEvent);
 		String key = getKeyForEvent(domainEvent);
 
@@ -40,30 +50,20 @@ public class KafkaEventPublisherAdapter implements DomainEventPublisher {
 			.then();
 	}
 
-	@Override
-	public Flux<Void> publishAll(List<Object> domainEvents) {
-		return Flux.fromIterable(domainEvents)
-			.concatMap(this::publish);
-	}
-
 	private String getTopicForEvent(Object event) {
-		return switch (event) {
-			case TollPassRegistered _ -> tollPassesTopic;
-			case TransactionAuthorized _ -> tollTransactionsTopic;
-			case TransactionDeclined _ -> tollTransactionsTopic;
-			case AccountBalanceLow _ -> accountAlertsTopic;
-			default -> throw new IllegalArgumentException("Unknown event type: " + event.getClass().getName());
-		};
+		if (event instanceof TollPassRegistered) return tollPassesTopic;
+		if (event instanceof TransactionAuthorized) return tollTransactionsTopic;
+		if (event instanceof TransactionDeclined) return tollTransactionsTopic;
+		if (event instanceof AccountBalanceLow) return accountAlertsTopic;
+		throw new IllegalArgumentException("Unknown event type: " + event.getClass().getName());
 	}
 
 	private String getKeyForEvent(Object event) {
-		return switch (event) {
-			case TollPassRegistered e -> e.passId();
-			case TransactionAuthorized e -> e.passId();
-			case TransactionDeclined e -> e.passId();
-			case AccountBalanceLow e -> e.accountId() != null ? e.accountId() : "unknown";
-			default -> "unknown";
-		};
+		if (event instanceof TollPassRegistered e) return e.passId();
+		if (event instanceof TransactionAuthorized e) return e.passId();
+		if (event instanceof TransactionDeclined e) return e.passId();
+		if (event instanceof AccountBalanceLow e) return e.accountId() != null ? e.accountId() : "unknown";
+		return "unknown";
 	}
 
 }

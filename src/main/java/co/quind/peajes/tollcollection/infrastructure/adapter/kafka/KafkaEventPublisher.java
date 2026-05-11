@@ -24,8 +24,8 @@ public class KafkaEventPublisher implements EventPublisherPort {
 
     public KafkaEventPublisher(
             KafkaTemplate<String, Object> kafkaTemplate,
-            @Value("${toll.kafka.topics.transactions}") String transactionsTopic,
-            @Value("${toll.kafka.topics.accounts}") String accountsTopic) {
+            @Value("${toll.kafka.topics.transactions:toll.transactions.v1}") String transactionsTopic,
+            @Value("${toll.kafka.topics.accounts:account.alerts.v1}") String accountsTopic) {
         this.kafkaTemplate = kafkaTemplate;
         this.transactionsTopic = transactionsTopic;
         this.accountsTopic = accountsTopic;

@@ -10,7 +10,7 @@ public class WebClientConfig {
 
     @Bean
     public WebClient accountManagementWebClient(
-            @Value("${toll.account-management.base-url}") String baseUrl) {
+            @Value("${app.account-management.base-url:http://localhost:8081}") String baseUrl) {
         return WebClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader("Content-Type", "application/json")

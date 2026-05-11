@@ -7,6 +7,5 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface LaneR2dbcRepository extends R2dbcRepository<LaneEntity, UUID> {
-	Mono<LaneEntity> findById(UUID id);
-	Mono<LaneEntity> findByName(String name);
+	Mono<LaneEntity> findByIdAndStationId(UUID id, UUID stationId);
 }

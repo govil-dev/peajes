@@ -72,3 +72,4 @@ Documentos referenciados:
 - [`docs/constraints.md`](docs/constraints.md)
 - [`docs/compliance.md`](docs/compliance.md)
 - [`docs/environments.md`](docs/environments.md)
+- [`docs/fitness.md`](docs/fitness.md)

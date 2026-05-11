@@ -1,57 +1,5 @@
 {
   "hooks": {
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Verify External Service Resilience Patterns\nObjective: Confirm that interactions with external services implement required resilience patterns (timeouts, retries, circuit breakers, fallbacks).\nTrigger: after modifying code related to external service calls\nMatcher: Write|Edit|MultiEdit\nSource refs: coding-standard:external-service-integration-resilience, coding-standard:robust-external-service-integration, design-pattern:retry-pattern, design-pattern:fallback-pattern, use-case:HU-003, use-case:HU-005, use-case:HU-007\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-external-service-resilience-verification"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Verify Kafka Consumer Idempotency\nObjective: Ensure Kafka consumers are designed with idempotency to handle potential duplicate messages, especially for critical events.\nTrigger: after modifying Kafka consumer logic or event processing\nMatcher: Write|Edit|MultiEdit\nSource refs: coding-standard:kafka-event-delivery--idempotency, coding-standard:event-delivery-semantics, coding-standard:idempotent-event-processing, design-pattern:idempotent-consumer, use-case:HU-001, use-case:HU-003, use-case:HU-005, use-case:HU-007\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-kafka-idempotency-check"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Verify PCI DSS PAN Tokenization\nObjective: Confirm that Primary Account Numbers (PAN) are tokenized and never stored, adhering to PCI DSS Level 4.\nTrigger: after modifying code related to payment processing or sensitive financial data\nMatcher: Write|Edit|MultiEdit\nSource refs: constraint:PCI DSS Nivel 4: PAN tokenizado; nunca se almacena el PAN completo; se guarda el token de PayU., compliance-requirement:PCI DSS Nivel 4: Aplica para procesamiento de números de tarjeta (recargas PayU); PAN tokenizado (nunca se almacena completo, solo token de PayU);, use-case:HU-003\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-pci-dss-pan-tokenization-check"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Verify MDC Usage for Logging Correlation\nObjective: Confirm that MDC (Mapped Diagnostic Context) is used for `correlationId`, `tagId` (masked), `stationId`, and `traceId` in logs.\nTrigger: after modifying logging configurations or statements\nMatcher: Write|Edit|MultiEdit\nSource refs: constraint:Logging: MDC obligatorio por request para correlationId, tagId (enmascarado), stationId, traceId.\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-logging-mdc-correlation-check"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Verify Data Validation and Constraints\nObjective: Confirm that string fields adhere to length limits and numeric fields enforce non-negativity, throwing specific exceptions on violation.\nTrigger: after modifying data models or input validation logic\nMatcher: Write|Edit|MultiEdit\nSource refs: coding-standard:data-validation--error-handling, coding-standard:data-validation-and-constraints\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "posttool-data-validation-constraints-check"
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -60,6 +8,16 @@
             "type": "command",
             "command": "cfg=\"$HOME/.agentic/client-config.json\"; command -v jq >/dev/null 2>&1 || exit 0; [ -f \"$cfg\" ] || exit 0; key=$(jq -r '.guardian_api_key // empty' \"$cfg\" 2>/dev/null); [ -z \"$key\" ] && exit 0; url=\"${AGENTIC_AGENT_URL:-$(jq -r '.guardian_url // empty' \"$cfg\" 2>/dev/null)}\"; [ -z \"$url\" ] && exit 0; base=\"${url%%/agent/*}\"; input=$(cat); curl -sf -X POST \"$base/agent/check-partial\" -H \"X-API-Key: $key\" -H \"Content-Type: application/json\" -d \"$input\" >/dev/null 2>&1; exit 0",
             "id": "guardian-post-edit"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v agentic >/dev/null 2>&1 || exit 0; path=$(echo \"$CLAUDE_TOOL_INPUT\" | command -v jq >/dev/null 2>&1 && jq -r '.path // empty' 2>/dev/null); [ -z \"$path\" ] && exit 0; agentic record-attribution --path \"$path\" --generator claude-code; exit 0",
+            "id": "record-attribution-post-write"
           }
         ]
       }

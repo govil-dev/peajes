@@ -25,6 +25,14 @@ public record MoneyAmount(BigDecimal amount, String currency) {
 		return new MoneyAmount(amount.setScale(2, java.math.RoundingMode.HALF_UP), "COP");
 	}
 
+	public static MoneyAmount of(String amount, String currency) {
+		return new MoneyAmount(new BigDecimal(amount).setScale(2, java.math.RoundingMode.HALF_UP), currency);
+	}
+
+	public String toDecimalString() {
+		return toJsonString();
+	}
+
 	public static MoneyAmount zero() {
 		return new MoneyAmount(BigDecimal.ZERO.setScale(2), "COP");
 	}
