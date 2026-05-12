@@ -40,10 +40,17 @@ resilience4j:
         sliding-window-size: 20
         wait-duration-in-open-state: 30s
         permitted-number-of-calls-in-half-open-state: 5
+      payu-gateway:
+        failure-rate-threshold: 60
+        sliding-window-size: 10
+        wait-duration-in-open-state: 60s
+        permitted-number-of-calls-in-half-open-state: 3
 
 app:
   account-management:
     base-url: ${ACCOUNT_MANAGEMENT_URL:http://localhost:8081}
+  payu:
+    base-url: ${PAYU_BASE_URL:http://localhost:8082}
   toll:
     tariff:
       class-i: 9500.00
@@ -53,3 +60,7 @@ app:
         toll-passes: toll.passes.v1
         toll-transactions: toll.transactions.v1
         account-alerts: account.alerts.v1
+  account:
+    kafka:
+      topics:
+        account-events: account.events.v1
