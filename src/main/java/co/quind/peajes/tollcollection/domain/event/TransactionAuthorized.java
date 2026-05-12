@@ -8,5 +8,7 @@ public record TransactionAuthorized(
 	String currency,
 	String balanceAfter,
 	String authorizedAt,
-	String occurredAt
+	String occurredAt,
+	String stationId,
+	String vehicleClass
 ) {}

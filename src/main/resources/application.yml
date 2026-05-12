@@ -17,6 +17,12 @@ spring:
     password: ${DB_PASSWORD:peajes}
     locations: classpath:db/migration
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
@@ -64,3 +70,12 @@ app:
     kafka:
       topics:
         account-events: account.events.v1
+  kafka:
+    consumer:
+      balance-cache:
+        group-id: peajes-co-balance-cache
+      transaction-history:
+        group-id: peajes-co-transaction-history
+  cache:
+    balance:
+      ttl-seconds: 10
