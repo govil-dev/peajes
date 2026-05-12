@@ -1,32 +1,30 @@
 ---
 name: skill-code-language-convention
-description: "Ensure all code artifacts (package names, class names, method names, variable names, event names) use English, while business-oriented Javadoc comments use Spanish, for consistent readability and documentation."
+description: "Ensure all code artifacts (packages, classes, methods, events) use English, while Javadoc comments for business context use Spanish, as per project standards."
 metadata:
   framework_principle: P5
-  enforcement_mode: instruct
+  enforcement_mode: warn
   criticality_level: [light]
 ---
 
-# Enforce Code Language Conventions
+# Code Language Convention Enforcement
 
 ## Objetivo
-Ensure all code artifacts (package names, class names, method names, variable names, event names) use English, while business-oriented Javadoc comments use Spanish, for consistent readability and documentation.
+Ensure all code artifacts (packages, classes, methods, events) use English, while Javadoc comments for business context use Spanish, as per project standards.
 
 ## Trigger
-on any code submission
+on-code-change
 
 ## Inputs
-- Source code files
-- Javadoc comments
+- Java source code
 
 ## Procedimiento
-1. Review new and modified code for naming conventions: English for all code identifiers.
-2. Check Javadoc comments for business logic descriptions to be written in Spanish.
-3. Utilize IDE inspections or static analysis tools to flag potential language inconsistencies.
-4. Provide guidance on when to use English vs. Spanish in documentation and comments.
+1. Review package, class, method, and variable names for adherence to English naming conventions.
+2. Inspect Javadoc comments for business-oriented descriptions written in Spanish.
+3. Flag any mixed-language usage within code identifiers or non-business Javadoc comments.
 
 ## Output esperado
-Code adheres to the specified language conventions, improving readability and maintainability.
+Code adheres to the defined language conventions, improving readability and maintainability.
 
 ## Source refs (project)
 - Idioma del código: Inglés para nombres de paquete, clases, métodos, eventos. Español en comentarios Javadoc orientados al negocio
