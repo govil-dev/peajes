@@ -2,6 +2,7 @@ package co.quind.peajes.accountmanagement.infrastructure.web;
 
 import co.quind.peajes.accountmanagement.application.dto.BalanceResponse;
 import co.quind.peajes.accountmanagement.domain.port.in.QueryBalanceUseCase;
+import co.quind.peajes.accountmanagement.domain.valueobject.AccountId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,7 @@ public class UserCarrierController {
     @GetMapping("/api/v1/user-carriers/{userCarrierId}/balance")
     public Mono<BalanceResponse> getBalance(@PathVariable String userCarrierId) {
         log.info("Balance query: userCarrierId={}", userCarrierId);
-        return queryBalanceUseCase.queryBalance(userCarrierId)
+        return queryBalanceUseCase.queryBalance(AccountId.of(userCarrierId))
             .map(e -> new BalanceResponse(
                 e.balance().toPlainString(),
                 e.currency(),

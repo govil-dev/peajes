@@ -48,7 +48,7 @@ class QueryBalanceServiceTest {
         BalanceCacheEntry cached = new BalanceCacheEntry(BALANCE, "COP", NOW);
         when(balanceCachePort.get(ACCOUNT_ID)).thenReturn(Mono.just(cached));
 
-        StepVerifier.create(useCase.queryBalance(ACCOUNT_ID))
+        StepVerifier.create(useCase.queryBalance(AccountId.of(ACCOUNT_ID)))
             .assertNext(entry -> {
                 assertThat(entry.balance()).isEqualByComparingTo(BALANCE);
                 assertThat(entry.currency()).isEqualTo("COP");
@@ -71,7 +71,7 @@ class QueryBalanceServiceTest {
         when(accountRepository.findByAccountId(any())).thenReturn(Mono.just(account));
         when(balanceCachePort.put(eq(ACCOUNT_ID), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.queryBalance(ACCOUNT_ID))
+        StepVerifier.create(useCase.queryBalance(AccountId.of(ACCOUNT_ID)))
             .assertNext(entry -> {
                 assertThat(entry.balance()).isEqualByComparingTo(BALANCE);
                 assertThat(entry.currency()).isEqualTo("COP");
@@ -86,7 +86,7 @@ class QueryBalanceServiceTest {
         when(balanceCachePort.get(ACCOUNT_ID)).thenReturn(Mono.empty());
         when(accountRepository.findByAccountId(any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(useCase.queryBalance(ACCOUNT_ID))
+        StepVerifier.create(useCase.queryBalance(AccountId.of(ACCOUNT_ID)))
             .expectError(AccountNotFoundException.class)
             .verify();
     }
