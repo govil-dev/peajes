@@ -21,14 +21,17 @@ public class KafkaEventPublisher implements EventPublisherPort {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final String transactionsTopic;
     private final String accountsTopic;
+    private final String incidentsTopic;
 
     public KafkaEventPublisher(
             KafkaTemplate<String, Object> kafkaTemplate,
-            @Value("${toll.kafka.topics.transactions}") String transactionsTopic,
-            @Value("${toll.kafka.topics.accounts}") String accountsTopic) {
+            @Value("${toll.kafka.topics.transactions:toll.transactions.v1}") String transactionsTopic,
+            @Value("${toll.kafka.topics.accounts:account.alerts.v1}") String accountsTopic,
+            @Value("${toll.kafka.topics.incidents:incidents.events.v1}") String incidentsTopic) {
         this.kafkaTemplate = kafkaTemplate;
         this.transactionsTopic = transactionsTopic;
         this.accountsTopic = accountsTopic;
+        this.incidentsTopic = incidentsTopic;
     }
 
     @Override
@@ -40,6 +43,11 @@ public class KafkaEventPublisher implements EventPublisherPort {
     public Mono<Void> publishToAccounts(Object event) {
         return publish(accountsTopic, event);
     }
+
+	@Override
+	public Mono<Void> publishToIncidents(Object event) {
+		return publish(incidentsTopic, event);
+	}
 
     private Mono<Void> publish(String topic, Object event) {
         return Mono.fromFuture(() -> kafkaTemplate.send(topic, event).toCompletableFuture())

@@ -1,20 +1,24 @@
 spring:
   application:
-    name: peajes-toll-collection
+    name: peajes-co
 
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/peajes
-    username: peajes
-    password: peajes
+    url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:peajes}
+    username: ${DB_USER:peajes}
+    password: ${DB_PASSWORD:peajes}
+    pool:
+      initial-size: 10
+      max-size: 50
+      max-idle-time: 30m
 
   flyway:
-    url: jdbc:postgresql://localhost:5432/peajes
-    user: peajes
-    password: peajes
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:peajes}
+    user: ${DB_USER:peajes}
+    password: ${DB_PASSWORD:peajes}
     locations: classpath:db/migration
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -23,37 +27,40 @@ spring:
       properties:
         enable.idempotence: true
         max.in.flight.requests.per.connection: 1
+    properties:
+      security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+      sasl.mechanism: ${KAFKA_SASL_MECHANISM:}
+      sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG:}
 
 resilience4j:
   circuitbreaker:
     instances:
       account-management:
         failure-rate-threshold: 50
-        sliding-window-size: 10
-        wait-duration-in-open-state: 10s
+        sliding-window-size: 20
+        wait-duration-in-open-state: 30s
         permitted-number-of-calls-in-half-open-state: 5
-        register-health-indicator: true
-  timelimiter:
-    instances:
-      account-management:
-        timeout-duration: 200ms
-        cancel-running-future: true
+      payu-gateway:
+        failure-rate-threshold: 60
+        sliding-window-size: 10
+        wait-duration-in-open-state: 60s
+        permitted-number-of-calls-in-half-open-state: 3
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,prometheus,circuitbreakers
-  health:
-    circuitbreakers:
-      enabled: true
-
-toll:
+app:
   account-management:
-    base-url: http://account-management-api
-  balance-alert-threshold: "15000.00"
-  balance-alert-currency: "COP"
-  kafka:
-    topics:
-      transactions: toll.transactions.v1
-      accounts: toll.accounts.v1
+    base-url: ${ACCOUNT_MANAGEMENT_URL:http://localhost:8081}
+  payu:
+    base-url: ${PAYU_BASE_URL:http://localhost:8082}
+  toll:
+    tariff:
+      class-i: 9500.00
+      low-balance-threshold: 15000.00
+    kafka:
+      topics:
+        toll-passes: toll.passes.v1
+        toll-transactions: toll.transactions.v1
+        account-alerts: account.alerts.v1
+  account:
+    kafka:
+      topics:
+        account-events: account.events.v1

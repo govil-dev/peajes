@@ -26,16 +26,16 @@ public class BarrierWebSocketAdapter implements BarrierControlPort {
 
     @Override
     public Mono<Void> openBarrier(LaneId laneId) {
-        return sendCommand(laneId, Map.of("command", "OPEN", "laneId", laneId.value()));
+        return sendCommand(laneId, Map.of("command", "OPEN", "laneId", laneId.value().toString()));
     }
 
     @Override
     public Mono<Void> notifyOperator(LaneId laneId, String message) {
-        return sendCommand(laneId, Map.of("command", "NOTIFY", "laneId", laneId.value(), "message", message));
+        return sendCommand(laneId, Map.of("command", "NOTIFY", "laneId", laneId.value().toString(), "message", message));
     }
 
     private Mono<Void> sendCommand(LaneId laneId, Map<String, String> payload) {
-        return sessionRegistry.getSession(laneId.value())
+        return sessionRegistry.getSession(laneId.value().toString())
                 .flatMap(session -> {
                     try {
                         String json = objectMapper.writeValueAsString(payload);
@@ -44,9 +44,9 @@ public class BarrierWebSocketAdapter implements BarrierControlPort {
                         return Mono.error(e);
                     }
                 })
-                .doOnSuccess(v -> log.info("Comando enviado a barrera laneId={} payload={}", laneId.value(), payload))
+                .doOnSuccess(v -> log.info("Comando enviado a barrera laneId={} payload={}", laneId.value().toString(), payload))
                 .doOnError(e -> log.warn("Barrera no conectada o error al enviar a laneId={}: {}",
-                        laneId.value(), e.getMessage()))
+                        laneId.value().toString(), e.getMessage()))
                 .onErrorResume(e -> Mono.empty());
     }
 }

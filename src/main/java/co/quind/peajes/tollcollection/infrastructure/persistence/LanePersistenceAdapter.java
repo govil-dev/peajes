@@ -19,8 +19,8 @@ public class LanePersistenceAdapter implements LaneRepository {
 
     @Override
     public Mono<Lane> findByLaneIdAndStationId(LaneId laneId, StationId stationId) {
-        return r2dbcRepository.findByLaneIdAndStationId(laneId.value(), stationId.value())
-                .map(e -> new Lane(new LaneId(e.getLaneId()), new StationId(e.getStationId()),
-                        LaneStatus.valueOf(e.getStatus())));
+        return r2dbcRepository.findByIdAndStationId(laneId.value(), stationId.value())
+                .map(e -> new Lane(new LaneId(e.id()), new StationId(e.stationId()),
+                        LaneStatus.valueOf(e.status())));
     }
 }

@@ -54,7 +54,7 @@ public class AccountManagementAdapter implements AccountManagementPort {
     @CircuitBreaker(name = CB_NAME)
     @TimeLimiter(name = CB_NAME)
     public Mono<MoneyAmount> deductBalance(TagId tagId, MoneyAmount amount, PassId passId) {
-        var request = new DeductionRequest(passId.value(), amount.toDecimalString(), amount.currency());
+        var request = new DeductionRequest(passId.value(), amount.toJsonString(), amount.currency());
         return webClient.post()
                 .uri("/api/v1/accounts/tags/{tagId}/deductions", tagId.value())
                 .bodyValue(request)

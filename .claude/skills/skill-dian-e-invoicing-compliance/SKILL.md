@@ -1,8 +1,8 @@
 ---
 name: skill-dian-e-invoicing-compliance
-description: "Develop electronic invoicing functionality fully compliant with DIAN Resolution 000042/2020, including generating XML UBL 2.1 invoices, digital signatures, CUFE, integration with authorized technological providers, and proper retention policies."
+description: "Ensure the electronic invoicing process (generation, signing, CUFE, retention) fully complies with Colombian DIAN Resolution 000042/2020."
 metadata:
-  framework_principle: P5
+  framework_principle: P1
   enforcement_mode: verify
   criticality_level: [standard]
 ---
@@ -10,26 +10,27 @@ metadata:
 # DIAN Electronic Invoicing Compliance
 
 ## Objetivo
-Develop electronic invoicing functionality fully compliant with DIAN Resolution 000042/2020, including generating XML UBL 2.1 invoices, digital signatures, CUFE, integration with authorized technological providers, and proper retention policies.
+Ensure the electronic invoicing process (generation, signing, CUFE, retention) fully complies with Colombian DIAN Resolution 000042/2020.
 
 ## Trigger
-during development
+on code generation or modification of billing services
 
 ## Inputs
-- DIAN Resolution 000042/2020 specification
-- billing domain events
-- integration details for technological provider
+- Billing service code (invoice generation logic)
+- Configuration for DIAN technological provider integration
+- Database schema for invoice storage
 
 ## Procedimiento
-1. Implement XML UBL 2.1 generation for electronic invoices and credit notes.
-2. Integrate with a digital certificate for signing invoices as per DIAN requirements.
-3. Generate and embed the CUFE (Código Único de Facturación Electrónica).
-4. Develop an adapter for sending invoices to an authorized technological provider.
-5. Implement a storage mechanism for signed XMLs with a minimum 7-year retention policy.
+1. Verify that invoices are generated in XML UBL 2.1 format and digitally signed with a DIAN-authorized certificate.
+2. Confirm the system integrates with an authorized technological provider to obtain the CUFE (Código Único de Facturación Electrónica).
+3. Ensure that credit notes for cancellations or corrections are also generated electronically with their own CUFE.
+4. Validate that signed XML invoices are retained for a minimum of 7 years (project policy exceeds 5-year legal minimum).
+5. Check for idempotency in invoice generation to prevent duplicate invoices for the same transaction.
 
 ## Output esperado
-Electronic invoicing system that generates, signs, and transmits compliant invoices and credit notes.
+Electronic invoicing process is fully compliant with DIAN regulations, generating valid, signed invoices and credit notes.
 
 ## Source refs (project)
-- Resolución DIAN 000042/2020 — Facturación electrónica: Factura electrónica en formato XML UBL 2.1 firmada con certificado digital DIAN.
-- Resolución DIAN 000042/2020
+- Resolución DIAN 000042/2020 — Facturación electrónica
+- HU-005
+- HU-006

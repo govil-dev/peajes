@@ -1,8 +1,11 @@
 package co.quind.peajes.tollcollection.infrastructure.persistence;
 
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import java.util.UUID;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
-public interface LaneR2dbcRepository extends ReactiveCrudRepository<LaneEntity, String> {
-    Mono<LaneEntity> findByLaneIdAndStationId(String laneId, String stationId);
+@Repository
+public interface LaneR2dbcRepository extends R2dbcRepository<LaneEntity, UUID> {
+	Mono<LaneEntity> findByIdAndStationId(UUID id, UUID stationId);
 }

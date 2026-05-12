@@ -1,37 +1,36 @@
 ---
 name: skill-kafka-idempotent-consumer
-description: "Design and implement Kafka consumers with robust deduplication logic using unique event identifiers (e.g., `passId`, `TollPassId`) to ensure 'at-least-once' delivery semantics result in 'exactly-once' processing for critical events."
+description: "Design and implement Kafka consumers to process events idempotently, ensuring operations are processed only once even if messages are received multiple times."
 metadata:
   framework_principle: P5
   enforcement_mode: verify
   criticality_level: [standard]
 ---
 
-# Kafka Idempotent Consumer Development
+# Kafka Idempotent Consumer Implementation
 
 ## Objetivo
-Design and implement Kafka consumers with robust deduplication logic using unique event identifiers (e.g., `passId`, `TollPassId`) to ensure 'at-least-once' delivery semantics result in 'exactly-once' processing for critical events.
+Design and implement Kafka consumers to process events idempotently, ensuring operations are processed only once even if messages are received multiple times.
 
 ## Trigger
-during development
+on-code-change
 
 ## Inputs
+- Java source code (Kafka consumers)
 - Kafka event schemas
-- event processing requirements
-- unique identifier strategy
 
 ## Procedimiento
-1. Identify critical events requiring idempotent processing.
-2. Ensure each critical event carries a unique identifier.
-3. Implement a mechanism (e.g., database check, Redis cache) to track processed event IDs.
-4. Design consumers to check for prior processing before executing business logic.
-5. Return the result of the first processing for subsequent identical requests.
+1. Identify all Kafka consumers handling critical events.
+2. Verify that each consumer implements deduplication logic using unique identifiers (e.g., `passId`, `externalReferenceId`).
+3. Ensure that upon receiving a duplicate message, the consumer returns the result of the first processing without re-executing the operation.
+4. Confirm that 'at-least-once' delivery semantics are correctly handled by consumer idempotency.
 
 ## Output esperado
-Kafka consumers that process events exactly once, even with duplicate messages.
+Kafka consumers process events exactly once, preventing data inconsistencies due to duplicates.
 
 ## Source refs (project)
-- 4f2ebe8b-ecaf-4b0a-841d-5649d6aa125f
-- ab3c0f85-9954-40c8-9b38-2425eee13781
-- 2ce684e1-dc0c-409e-a119-fb73906820c6
-- 6291d447-a826-4dc8-b458-54c61c276f1e
+- idempotent-event-processing
+- event-delivery-semantics
+- kafka-event-delivery--idempotency
+- idempotent-consumer
+- HU-001

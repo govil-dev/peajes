@@ -1,135 +1,13 @@
 {
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: PII and Sensitive Data Handling Guidance\nObjective: Instruct on proper handling of PII and sensitive financial data according to privacy laws and PCI DSS before code generation or modification.\nTrigger: before tool execution on code that might handle sensitive data\nMatcher: Write|Edit|MultiEdit\nSource refs: c6de6d45-2b64-4524-b225-9bee71273e1b, Ley 1581/2012 — Habeas data y protección de datos personales: PII clasificada como dato sensible; almacenamiento cifrado en reposo (AES-256 vía Cloud SQL encryption); logs no contienen PII (enmascaramiento); derecho de supresión (endpoint DELETE /api/v1/accounts/{userId} con anonimización); aviso de privacidad y consentimiento explícito; registro de tratamiento de datos ante SIC., PCI DSS Nivel 4: Aplica para procesamiento de números de tarjeta (recargas PayU); PAN tokenizado (nunca se almacena completo, solo token de PayU); transmisión de datos de tarjeta siempre vía HTTPS/TLS 1.3; acceso a datos de tarjeta restringido por roles (FinanceAnalyst con 2FA); escaneo de vulnerabilidades trimestral (ASV externo); log de auditoría para accesos a datos de pago, retención 1 año mínimo., Seguridad de datos: Ningún campo PII en logs; PAN tokenizado en tránsito y en reposo., Logging: PII prohibida en logs; usar toMasked() para PII antes de loggear.\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-pii-data-handling-guidance"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: External Service Resilience Guidance\nObjective: Instruct on implementing resilience patterns (timeouts, circuit breakers, retries, fallbacks) for external service integrations.\nTrigger: before tool execution on code integrating with external services\nMatcher: Write|Edit|MultiEdit\nSource refs: 1a573d41-f7e9-42c1-8693-3da003102e62, fa28a475-5d69-4b7c-b9b0-09fd60a69654, f014f09a-8fca-442a-ab78-b98d5c032581, 9cb93807-f4b4-4c76-86c4-dade1c32d08e, Integraciones externas fijas: ANI (API REST propietaria, no existe OpenAPI spec, se integra vía adaptador con circuit breaker); Banco adquirente (SFTP + ISO 20022); PayU (SDK Java oficial)\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-external-resilience-guidance"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Financial Data Type Representation Guidance\nObjective: Instruct on using BigDecimal with scale 2 and MoneyAmount value objects for monetary amounts.\nTrigger: before tool execution on code handling financial data\nMatcher: Write|Edit|MultiEdit\nSource refs: 58c84ffe-71f3-456c-927d-1d2647c2b26b, 280e17f5-f799-4390-abec-9f5156240673, 152eb76e-66e2-4e56-9a26-27b7290af8f6\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-financial-datatype-guidance"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Kafka Idempotent Consumer Guidance\nObjective: Instruct on designing Kafka consumers with idempotency to handle duplicate messages for 'at-least-once' delivery.\nTrigger: before tool execution on code for Kafka consumers\nMatcher: Write|Edit|MultiEdit\nSource refs: 4f2ebe8b-ecaf-4b0a-841d-5649d6aa125f, ab3c0f85-9954-40c8-9b38-2425eee13781, 2ce684e1-dc0c-409e-a119-fb73906820c6, 6291d447-a826-4dc8-b458-54c61c276f1e\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-kafka-idempotency-guidance"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Logging Standards and PII Masking Guidance\nObjective: Instruct on mandatory MDC usage for correlation IDs and strict prohibition of PII in logs, requiring masking.\nTrigger: before tool execution on code that includes logging statements\nMatcher: Write|Edit|MultiEdit\nSource refs: Logging: MDC obligatorio por request para correlationId, tagId (enmascarado), stationId, traceId., Logging: PII prohibida en logs; usar toMasked() para PII antes de loggear., c6de6d45-2b64-4524-b225-9bee71273e1b\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-logging-standards-guidance"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Standardized Technology Stack Compliance Check\nObjective: Warn if generated code deviates from the mandatory technology stack (Java 21, Spring Boot 3.3, WebFlux, R2DBC, Kafka).\nTrigger: before tool execution on any code generation or modification\nMatcher: Write|Edit|MultiEdit\nSource refs: 2103332c-ad51-40c9-9e1c-b225264803a6, Stack técnico mandatorio: No negociable para el MVP. Todo código generado por asistentes de IA debe respetar estas versiones.\nIf the rule is at risk, answer 'warn: <short reason>'. Otherwise answer 'ok'.",
-            "id": "pretool-tech-stack-compliance-check"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Code and Javadoc Language Guidance\nObjective: Instruct on using English for code elements (packages, classes, methods, events) and Spanish for business-oriented Javadoc comments.\nTrigger: before tool execution on any code generation or modification\nMatcher: Write|Edit|MultiEdit\nSource refs: Idioma del código: Inglés para nombres de paquete, clases, métodos, eventos. Español en comentarios Javadoc orientados al negocio.\nAnswer with a one-line reminder (<20 words) of what the developer must do next.",
-            "id": "pretool-code-language-guidance"
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Project hook: PII and Sensitive Data Handling Review\nObjective: Verify that generated or modified code correctly handles PII and sensitive financial data, including masking and tokenization, and avoids logging PII.\nTrigger: after tool execution on code that might handle sensitive data\nMatcher: Write|Edit|MultiEdit\nSource refs: c6de6d45-2b64-4524-b225-9bee71273e1b, Ley 1581/2012 — Habeas data y protección de datos personales: PII clasificada como dato sensible; almacenamiento cifrado en reposo (AES-256 vía Cloud SQL encryption); logs no contienen PII (enmascaramiento); derecho de supresión (endpoint DELETE /api/v1/accounts/{userId} con anonimización); aviso de privacidad y consentimiento explícito; registro de tratamiento de datos ante SIC., PCI DSS Nivel 4: Aplica para procesamiento de números de tarjeta (recargas PayU); PAN tokenizado (nunca se almacena completo, solo token de PayU); transmisión de datos de tarjeta siempre vía HTTPS/TLS 1.3; acceso a datos de tarjeta restringido por roles (FinanceAnalyst con 2FA); escaneo de vulnerabilidades trimestral (ASV externo); log de auditoría para accesos a datos de pago, retención 1 año mínimo., Seguridad de datos: Ningún campo PII en logs; PAN tokenizado en tránsito y en reposo., Logging: PII prohibida en logs; usar toMasked() para PII antes de loggear.\nAnswer 'ok' if the change satisfies the rule, or 'fail: <short reason>' if not.",
-            "id": "posttool-pii-data-handling-review"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: External Service Resilience Review\nObjective: Verify that generated or modified code for external service integrations includes appropriate resilience patterns.\nTrigger: after tool execution on code integrating with external services\nMatcher: Write|Edit|MultiEdit\nSource refs: 1a573d41-f7e9-42c1-8693-3da003102e62, fa28a475-5d69-4b7c-b9b0-09fd60a69654, f014f09a-8fca-442a-ab78-b98d5c032581, 9cb93807-f4b4-4c76-86c4-dade1c32d08e, Integraciones externas fijas: ANI (API REST propietaria, no existe OpenAPI spec, se integra vía adaptador con circuit breaker); Banco adquirente (SFTP + ISO 20022); PayU (SDK Java oficial)\nAnswer 'ok' if the change satisfies the rule, or 'fail: <short reason>' if not.",
-            "id": "posttool-external-resilience-review"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Financial Data Type Representation Review\nObjective: Verify that generated or modified code uses BigDecimal with scale 2 and MoneyAmount value objects for monetary amounts.\nTrigger: after tool execution on code handling financial data\nMatcher: Write|Edit|MultiEdit\nSource refs: 58c84ffe-71f3-456c-927d-1d2647c2b26b, 280e17f5-f799-4390-abec-9f5156240673, 152eb76e-66e2-4e56-9a26-27b7290af8f6\nAnswer 'ok' if the change satisfies the rule, or 'fail: <short reason>' if not.",
-            "id": "posttool-financial-datatype-review"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Kafka Idempotent Consumer Review\nObjective: Verify that generated or modified Kafka consumer code implements deduplication logic for idempotent processing.\nTrigger: after tool execution on code for Kafka consumers\nMatcher: Write|Edit|MultiEdit\nSource refs: 4f2ebe8b-ecaf-4b0a-841d-5649d6aa125f, ab3c0f85-9954-40c8-9b38-2425eee13781, 2ce684e1-dc0c-409e-a119-fb73906820c6, 6291d447-a826-4dc8-b458-54c61c276f1e\nAnswer 'ok' if the change satisfies the rule, or 'fail: <short reason>' if not.",
-            "id": "posttool-kafka-idempotency-review"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Project hook: Logging Standards and PII Masking Review\nObjective: Verify that generated or modified code adheres to logging standards, including MDC and PII masking.\nTrigger: after tool execution on code that includes logging statements\nMatcher: Write|Edit|MultiEdit\nSource refs: Logging: MDC obligatorio por request para correlationId, tagId (enmascarado), stationId, traceId., Logging: PII prohibida en logs; usar toMasked() para PII antes de loggear., c6de6d45-2b64-4524-b225-9bee71273e1b\nAnswer 'ok' if the change satisfies the rule, or 'fail: <short reason>' if not.",
-            "id": "posttool-logging-standards-review"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
             "type": "command",
-            "command": "agentic check --partial",
-            "id": "guardian-post-edit"
+            "command": "command -v agentic >/dev/null 2>&1 || exit 0; path=$(echo \"$CLAUDE_TOOL_INPUT\" | command -v jq >/dev/null 2>&1 && jq -r '.path // empty' 2>/dev/null); [ -z \"$path\" ] && exit 0; agentic record-attribution --path \"$path\" --generator claude-code; exit 0",
+            "id": "record-attribution-post-write"
           }
         ]
       }
