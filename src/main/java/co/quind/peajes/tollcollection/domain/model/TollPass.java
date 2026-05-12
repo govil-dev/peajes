@@ -39,19 +39,22 @@ public final class TollPass {
 
 	public static TollPass authorize(PassId passId, TagId tagId, StationId stationId,
 									 LaneId laneId, VehicleClass vehicleClass,
-									 MoneyAmount tariff, Instant detectedAt) {
+									 MoneyAmount tariff, Instant detectedAt,
+									 String accountId, String balanceAfter) {
 		TollPass tollPass = new TollPass(UUID.randomUUID(), passId, tagId, stationId, laneId,
 			vehicleClass, tariff, detectedAt, Instant.now(), TransactionStatus.AUTHORIZED, null);
 		tollPass.raiseTollPassRegistered();
-		tollPass.raiseTransactionAuthorized();
+		tollPass.raiseTransactionAuthorized(accountId, balanceAfter);
 		return tollPass;
 	}
 
 	/** Alias of {@link #authorize} for test builders. */
 	public static TollPass authorized(PassId passId, TagId tagId, StationId stationId,
 									  LaneId laneId, VehicleClass vehicleClass,
-									  MoneyAmount tariff, Instant detectedAt) {
-		return authorize(passId, tagId, stationId, laneId, vehicleClass, tariff, detectedAt);
+									  MoneyAmount tariff, Instant detectedAt,
+									  String accountId, String balanceAfter) {
+		return authorize(passId, tagId, stationId, laneId, vehicleClass, tariff, detectedAt,
+			accountId, balanceAfter);
 	}
 
 	public static TollPass decline(PassId passId, TagId tagId, StationId stationId,
@@ -110,17 +113,19 @@ public final class TollPass {
 		));
 	}
 
-	private void raiseTransactionAuthorized() {
+	private void raiseTransactionAuthorized(String accountId, String balanceAfter) {
 		if (status == TransactionStatus.AUTHORIZED) {
 			domainEvents.add(new TransactionAuthorized(
 				UUID.randomUUID().toString(),
 				passId.value(),
-				null,
+				accountId,
 				tariff.toJsonString(),
 				tariff.currency(),
-				null,
+				balanceAfter,
+				processedAt.toString(),
 				Instant.now().toString(),
-				Instant.now().toString()
+				stationId.toString(),
+				vehicleClass.name()
 			));
 		}
 	}

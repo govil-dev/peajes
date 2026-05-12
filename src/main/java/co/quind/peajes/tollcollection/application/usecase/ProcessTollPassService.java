@@ -111,18 +111,18 @@ public class ProcessTollPassService implements ProcessTollPassUseCase {
 			return saveAndPublish(declined)
 				.flatMap(result -> notifyOperator(laneId, "INSUFFICIENT_BALANCE").thenReturn(result));
 		}
-		return deductAndAuthorize(passId, tagId, stationId, laneId, vehicleClass, command, tariff);
+		return deductAndAuthorize(passId, tagId, stationId, laneId, vehicleClass, command, tariff, account.accountId());
 	}
 
 	private Mono<TollPassResult> deductAndAuthorize(PassId passId, TagId tagId, StationId stationId,
 													 LaneId laneId, VehicleClass vehicleClass,
 													 ProcessTollPassCommand command,
-													 TariffConfig tariff) {
+													 TariffConfig tariff, String accountId) {
 		return accountManagementPort.deductBalance(tagId, tariff.amount(), passId)
 			.flatMap(newBalance -> {
 				log.info("Balance deducted: tagId={}, balanceAfter={}", tagId.toMasked(), newBalance.toDisplayString());
 				TollPass authorized = TollPass.authorize(passId, tagId, stationId, laneId, vehicleClass,
-					tariff.amount(), command.detectedAt());
+					tariff.amount(), command.detectedAt(), accountId, newBalance.toJsonString());
 				return saveAndPublish(authorized)
 					.flatMap(result -> barrierControl.openBarrier(laneId)
 						.then(alertIfLowBalance(newBalance, tagId))

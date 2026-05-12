@@ -60,7 +60,8 @@ class ProcessTollPassUseCaseTest {
         var account = new AccountDetails("ACC-001", new TagId("A1B2C3D4"), TagStatus.ACTIVE, BALANCE_SUFFICIENT);
         var tollPass = TollPass.authorized(PassId.of(new TagId("A1B2C3D4"), DETECTED_AT),
                 new TagId("A1B2C3D4"), new StationId(STATION_UUID),
-                new LaneId(LANE_UUID), VehicleClass.CLASS_I, TARIFF, DETECTED_AT);
+                new LaneId(LANE_UUID), VehicleClass.CLASS_I, TARIFF, DETECTED_AT,
+                "ACC-001", "40500.00");
 
         when(tollPassRepository.findByPassId(any())).thenReturn(Mono.empty());
         when(laneRepository.findByLaneIdAndStationId(any(), any())).thenReturn(Mono.just(lane));
@@ -119,7 +120,8 @@ class ProcessTollPassUseCaseTest {
         var command = buildCommand();
         var existingPass = TollPass.authorized(PassId.of(new TagId("A1B2C3D4"), DETECTED_AT),
                 new TagId("A1B2C3D4"), new StationId(STATION_UUID),
-                new LaneId(LANE_UUID), VehicleClass.CLASS_I, TARIFF, DETECTED_AT);
+                new LaneId(LANE_UUID), VehicleClass.CLASS_I, TARIFF, DETECTED_AT,
+                "ACC-001", "40500.00");
 
         when(tollPassRepository.findByPassId(any())).thenReturn(Mono.just(existingPass));
 
